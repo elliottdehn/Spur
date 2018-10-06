@@ -109,13 +109,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void updateUI(@Nullable FirebaseUser user){
         if(user != null){
-
-        } else {
-
+            Toast.makeText(getApplicationContext(), "Logged in user: " + user.getEmail(), Toast.LENGTH_LONG).show();
         }
     }
-
-
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
@@ -340,13 +336,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
 
         @Override
