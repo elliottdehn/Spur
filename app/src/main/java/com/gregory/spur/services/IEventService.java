@@ -1,8 +1,8 @@
-package com.gregory.spur.com.gregory.spur.services;
+package com.gregory.spur.services;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.gregory.spur.com.gregory.spur.domain.Event;
+import com.gregory.spur.domain.Event;
 
 public interface IEventService {
     void createEvent(Event event);

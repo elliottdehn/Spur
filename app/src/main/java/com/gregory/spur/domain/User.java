@@ -1,4 +1,4 @@
-package com.gregory.spur.com.gregory.spur.domain;
+package com.gregory.spur.domain;
 
 public class User {
 
