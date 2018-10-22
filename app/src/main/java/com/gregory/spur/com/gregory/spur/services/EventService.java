@@ -5,6 +5,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.com.gregory.spur.domain.Event;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EventService implements IEventService {
 
     private FirebaseFirestore db;
@@ -35,6 +38,10 @@ public class EventService implements IEventService {
     @Override
     public void getEvents(OnCompleteListener<QuerySnapshot> listener) {
         db.collection("events").get().addOnCompleteListener(listener);
+    }
+
+    public List<Event> listEvents(QuerySnapshot qs){
+        return  new ArrayList<Event>();
     }
 
     @Override
