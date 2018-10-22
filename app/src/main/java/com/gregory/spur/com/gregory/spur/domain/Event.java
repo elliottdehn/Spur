@@ -7,5 +7,4 @@ public class Event {
     private String desc;
     private Date startTime;
     private Date endTime;
-    private Location
 }
