@@ -1,4 +1,5 @@
 package com.gregory.spur.com.gregory.spur.services;
 
-public interface ReviewService {
+public interface IUserService {
+
 }

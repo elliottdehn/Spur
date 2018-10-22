@@ -1,4 +1,44 @@
 package com.gregory.spur.com.gregory.spur.services;
 
-public interface EventService {
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.com.gregory.spur.domain.Event;
+
+public class EventService implements IEventService {
+
+    private FirebaseFirestore db;
+
+    public EventService(){
+        this.db = FirebaseFirestore.getInstance();
+    }
+    @Override
+    public void createEvent(Event event) {
+
+    }
+
+    @Override
+    public void updateEvent(Event event) {
+
+    }
+
+    @Override
+    public void getEvent(String eventId) {
+
+    }
+
+    @Override
+    public void getEvents(int age, String gender, boolean romantic) {
+
+    }
+
+    @Override
+    public void getEvents(OnCompleteListener<QuerySnapshot> listener) {
+        db.collection("events").get().addOnCompleteListener(listener);
+    }
+
+    @Override
+    public void deleteEvent(Event event) {
+
+    }
 }
