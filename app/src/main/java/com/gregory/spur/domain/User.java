@@ -22,6 +22,38 @@ public class User {
         this.username = username;
     }
 
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setfName(String fName) {
+        this.fName = fName;
+    }
+
+    public void setlName(String lName) {
+        this.lName = lName;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public int getAge() {
         return age;
     }
