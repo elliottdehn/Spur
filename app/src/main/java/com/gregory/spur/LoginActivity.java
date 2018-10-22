@@ -3,6 +3,7 @@ package com.gregory.spur;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -109,7 +110,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void updateUI(@Nullable FirebaseUser user){
         if(user != null){
-            Toast.makeText(getApplicationContext(), "Logged in user: " + user.getEmail(), Toast.LENGTH_LONG).show();
+            // If the login was successful, launch the maps activity
+            Intent intent = new Intent(this, MapsActivity.class);
+            startActivity(intent);
         }
     }
 
