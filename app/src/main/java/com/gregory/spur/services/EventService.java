@@ -8,10 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.domain.Event;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EventService {
@@ -29,7 +26,7 @@ public class EventService {
 
     public void createEvent(Event event, OnCompleteListener<DocumentReference> listener) {
         Map<String, Object> docData = new HashMap<>();
-        docData.put("name", event.getTitle());
+        docData.put("name", event.getName());
         docData.put("desc", event.getDesc());
         docData.put("creator", event.getCreator());
         docData.put("loc", event.getLoc());

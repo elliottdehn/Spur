@@ -4,7 +4,6 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
-import java.util.Date;
 import java.util.List;
 
 public class Event {
@@ -13,7 +12,7 @@ public class Event {
     public static final int NO_MAX = Integer.MAX_VALUE;
 
     private DocumentReference creator;
-    private String title;
+    private String name;
     private String desc;
     private Timestamp start;
     private Timestamp end;
@@ -29,7 +28,7 @@ public class Event {
 
     public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc, boolean romantic, double min, double max, String vis, List<DocumentReference> attendees) {
         this.creator = creator;
-        this.title = title;
+        this.name = title;
         this.desc = desc;
         this.start = start;
         this.end = end;
@@ -49,12 +48,12 @@ public class Event {
         this.creator = creator;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDesc() {
