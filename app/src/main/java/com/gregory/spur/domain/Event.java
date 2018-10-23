@@ -7,6 +7,9 @@ import java.util.Date;
 
 public class Event {
 
+    public static final int NO_MIN = 0;
+    public static final int NO_MAX = Integer.MAX_VALUE;
+
     private String creator;
     private String title;
     private String description;
@@ -14,8 +17,12 @@ public class Event {
     private Date endTime;
     private GeoPoint location;
     private boolean romantic;
+    private int min;
+    private int max;
+    private String visibility;
 
-    public Event(String creator, String title, String description, Date startTime, Date endTime, GeoPoint location, boolean romantic) {
+    public Event(String creator, String title, String description, Date startTime, Date endTime,
+                 GeoPoint location, boolean romantic, int min, int max, String visibility) {
         this.creator = creator;
         this.title = title;
         this.description = description;
@@ -23,8 +30,34 @@ public class Event {
         this.endTime = endTime;
         this.location = location;
         this.romantic = romantic;
+        this.min = min;
+        this.max = max;
+        this.visibility = visibility;
     }
 
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
+    }
+
+    public int getMax() {
+        return max;
+    }
+
+    public void setMax(int max) {
+        this.max = max;
+    }
 
     public String getCreator() {
         return creator;
