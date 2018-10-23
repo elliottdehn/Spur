@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "766507908299-j90q8onma994e32od4eob487mekgaudm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gregory.spur",
+            "certificate_hash": "a499b302eff17ce7935cf186d9d764982b395bdc"
+          }
+        },
+        {
           "client_id": "766507908299-nmjbsge6t67rgo2o7i00kkck1fhosumf.apps.googleusercontent.com",
           "client_type": 3
         }

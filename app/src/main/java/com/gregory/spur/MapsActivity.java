@@ -1,7 +1,6 @@
 package com.gregory.spur;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -55,12 +54,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
         button = (Button) findViewById(R.id.add_event);
+        final OnCompleteListener listener = this;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                /*
                 Intent mIntent= new Intent(MapsActivity.this, CreateEventActivity.class);
                 startActivity(mIntent);
+                */
+                mEventService.getEvents(listener);
             }
         });
 
@@ -173,7 +175,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Event event = document.toObject(Event.class);
                 double lat = event.getLoc().getLatitude();
                 double lng = event.getLoc().getLongitude();
-                String title = event.getTitle();
+                String title = event.getName();
                 mMap.addMarker(
                         new MarkerOptions()
                                 .position(new LatLng(lat, lng))
@@ -196,6 +198,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mEventService.getEvents(this);
     }
 }
