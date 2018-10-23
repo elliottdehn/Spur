@@ -1,45 +1,109 @@
 package com.gregory.spur.domain;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Date;
+import java.util.List;
 
 public class Event {
 
     public static final int NO_MIN = 0;
     public static final int NO_MAX = Integer.MAX_VALUE;
 
-    private String creator;
+    private DocumentReference creator;
     private String title;
-    private String description;
-    private Date startTime;
-    private Date endTime;
-    private GeoPoint location;
+    private String desc;
+    private Date start;
+    private Date end;
+    private GeoPoint loc;
     private boolean romantic;
     private double min;
     private double max;
-    private String visibility;
+    private String vis;
+    private List<DocumentReference> attendees;
 
-    public Event(String creator, String title, String description, Date startTime, Date endTime,
-                 GeoPoint location, boolean romantic, double min, double max, String visibility) {
+    public Event() {
+    }
+
+    public Event(DocumentReference creator, String title, String desc, Date start, Date end,
+                 GeoPoint loc, boolean romantic, double min, double max, String vis,
+                 List<DocumentReference> attendees) {
         this.creator = creator;
         this.title = title;
-        this.description = description;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.location = location;
+        this.desc = desc;
+        this.start = start;
+        this.end = end;
+        this.loc = loc;
         this.romantic = romantic;
         this.min = min;
         this.max = max;
-        this.visibility = visibility;
+        this.vis = vis;
+        this.attendees = attendees;
     }
 
-    public String getVisibility() {
-        return visibility;
+    public static int getNoMin() {
+        return NO_MIN;
     }
 
-    public void setVisibility(String visibility) {
-        this.visibility = visibility;
+    public static int getNoMax() {
+        return NO_MAX;
+    }
+
+    public DocumentReference getCreator() {
+        return creator;
+    }
+
+    public void setCreator(DocumentReference creator) {
+        this.creator = creator;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public Date getStart() {
+        return start;
+    }
+
+    public void setStart(Date start) {
+        this.start = start;
+    }
+
+    public Date getEnd() {
+        return end;
+    }
+
+    public void setEnd(Date end) {
+        this.end = end;
+    }
+
+    public GeoPoint getLoc() {
+        return loc;
+    }
+
+    public void setLoc(GeoPoint loc) {
+        this.loc = loc;
+    }
+
+    public boolean isRomantic() {
+        return romantic;
+    }
+
+    public void setRomantic(boolean romantic) {
+        this.romantic = romantic;
     }
 
     public double getMin() {
@@ -58,61 +122,16 @@ public class Event {
         this.max = max;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getVis() {
+        return vis;
     }
 
-    public void setCreator(String creator) {
-        this.creator = creator;
+    public void setVis(String vis) {
+        this.vis = vis;
     }
 
-    public String getTitle() {
-        return title;
+    public List<DocumentReference> getAttendees() {
+        return attendees;
     }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public GeoPoint getLocation() {
-        return location;
-    }
-
-    public void setLocation(GeoPoint location) {
-        this.location = location;
-    }
-
-    public boolean isRomantic() {
-        return romantic;
-    }
-
-    public void setRomantic(boolean romantic) {
-        this.romantic = romantic;
-    }
-
 
 }
