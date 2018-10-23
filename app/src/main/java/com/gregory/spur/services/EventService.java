@@ -1,6 +1,7 @@
 package com.gregory.spur.services;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -20,18 +21,19 @@ public class EventService {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    public void createEvent(Event event, OnCompleteListener listener) {
+    public void createEvent(Event event, OnCompleteListener<DocumentReference> listener) {
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", event.getTitle());
-        docData.put("description", event.getDescription());
+        docData.put("desc", event.getDesc());
         docData.put("creator", event.getCreator());
-        docData.put("loc", event.getLocation());
+        docData.put("loc", event.getLoc());
         docData.put("min", event.getMin());
         docData.put("max", event.getMax());
         docData.put("romantic", event.isRomantic());
-        docData.put("vis", event.getVisibility());
-        docData.put("start", event.getStartTime());
-        docData.put("end", event.getEndTime());
+        docData.put("vis", event.getVis());
+        docData.put("start", event.getStart());
+        docData.put("end", event.getEnd());
+        docData.put("attendees",event.getAttendees());
         db.collection("events").add(docData).addOnCompleteListener(listener);
     }
 
@@ -43,7 +45,7 @@ public class EventService {
         db.collection("events").document(eventId).get().addOnCompleteListener(listener);
     }
 
-    public void deleteEvent(String eventId, OnCompleteListener listener) {
+    public void deleteEvent(String eventId, OnCompleteListener<Void> listener) {
         db.collection("events").document(eventId).delete().addOnCompleteListener(listener);
     }
 
@@ -55,11 +57,5 @@ public class EventService {
     public void getEvents(OnCompleteListener<QuerySnapshot> listener) {
         db.collection("events").get().addOnCompleteListener(listener);
     }
-
-
-    public static List<Event> listEvents(QuerySnapshot qs){
-        return  new ArrayList<Event>();
-    }
-
 
 }
