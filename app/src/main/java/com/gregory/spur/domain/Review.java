@@ -1,15 +1,17 @@
 package com.gregory.spur.domain;
 
+import com.google.firebase.firestore.DocumentReference;
+
 import java.util.Date;
 
 public class Review {
-    private String author;
+    private DocumentReference author;
+    private DocumentReference target;
     private boolean like;
-    private String target;
     private String description;
     private Date written;
 
-    public Review(String author, boolean like, String target, String description, Date written) {
+    public Review(DocumentReference author, boolean like, DocumentReference target, String description, Date written) {
         this.author = author;
         this.like = like;
         this.target = target;
@@ -17,11 +19,11 @@ public class Review {
         this.written = written;
     }
 
-    public String getAuthor() {
+    public DocumentReference getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(DocumentReference author) {
         this.author = author;
     }
 
@@ -33,11 +35,11 @@ public class Review {
         this.like = like;
     }
 
-    public String getTarget() {
+    public DocumentReference getTarget() {
         return target;
     }
 
-    public void setTarget(String target) {
+    public void setTarget(DocumentReference target) {
         this.target = target;
     }
 
