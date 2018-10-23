@@ -32,11 +32,11 @@ public class EventService {
         docData.put("vis", event.getVisibility());
         docData.put("start", event.getStartTime());
         docData.put("end", event.getEndTime());
-        db.collection("cities").document("LA").set(docData).addOnCompleteListener(listener);
+        db.collection("events").add(docData).addOnCompleteListener(listener);
     }
 
-    public void updateEvent(Event event, OnCompleteListener listener) {
-        createEvent(event, listener); //in this case, updating == creating
+    public void updateEvent(String eventId, Event event) {
+        db.collection("events").document(eventId).set(event);
     }
 
     public void getEvent(String eventId, OnCompleteListener<DocumentSnapshot> listener) {

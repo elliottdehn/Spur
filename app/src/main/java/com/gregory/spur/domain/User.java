@@ -2,7 +2,7 @@ package com.gregory.spur.domain;
 
 public class User {
 
-    private int age;
+    private double age;
     private String bio;
     private String city;
     private String fName;
@@ -11,7 +11,7 @@ public class User {
     private double rating;
     private String username;
 
-    public User(int age, String bio, String city, String fName, String lName, String gender, double rating, String username){
+    public User(double age, String bio, String city, String fName, String lName, String gender, double rating, String username){
         this.age = age;
         this.bio = bio;
         this.city = city;
@@ -22,7 +22,7 @@ public class User {
         this.username = username;
     }
 
-    public void setAge(int age) {
+    public void setAge(double age) {
         this.age = age;
     }
 
@@ -54,7 +54,7 @@ public class User {
         this.username = username;
     }
 
-    public int getAge() {
+    public double getAge() {
         return age;
     }
 

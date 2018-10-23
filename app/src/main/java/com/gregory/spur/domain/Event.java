@@ -1,7 +1,6 @@
 package com.gregory.spur.domain;
 
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 
@@ -17,12 +16,12 @@ public class Event {
     private Date endTime;
     private GeoPoint location;
     private boolean romantic;
-    private int min;
-    private int max;
+    private double min;
+    private double max;
     private String visibility;
 
     public Event(String creator, String title, String description, Date startTime, Date endTime,
-                 GeoPoint location, boolean romantic, int min, int max, String visibility) {
+                 GeoPoint location, boolean romantic, double min, double max, String visibility) {
         this.creator = creator;
         this.title = title;
         this.description = description;
@@ -43,19 +42,19 @@ public class Event {
         this.visibility = visibility;
     }
 
-    public int getMin() {
+    public double getMin() {
         return min;
     }
 
-    public void setMin(int min) {
+    public void setMin(double min) {
         this.min = min;
     }
 
-    public int getMax() {
+    public double getMax() {
         return max;
     }
 
-    public void setMax(int max) {
+    public void setMax(double max) {
         this.max = max;
     }
 
