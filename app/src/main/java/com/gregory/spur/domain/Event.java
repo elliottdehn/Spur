@@ -1,5 +1,6 @@
 package com.gregory.spur.domain;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -14,8 +15,8 @@ public class Event {
     private DocumentReference creator;
     private String title;
     private String desc;
-    private Date start;
-    private Date end;
+    private Timestamp start;
+    private Timestamp end;
     private GeoPoint loc;
     private boolean romantic;
     private double min;
@@ -26,9 +27,7 @@ public class Event {
     public Event() {
     }
 
-    public Event(DocumentReference creator, String title, String desc, Date start, Date end,
-                 GeoPoint loc, boolean romantic, double min, double max, String vis,
-                 List<DocumentReference> attendees) {
+    public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc, boolean romantic, double min, double max, String vis, List<DocumentReference> attendees) {
         this.creator = creator;
         this.title = title;
         this.desc = desc;
@@ -40,14 +39,6 @@ public class Event {
         this.max = max;
         this.vis = vis;
         this.attendees = attendees;
-    }
-
-    public static int getNoMin() {
-        return NO_MIN;
-    }
-
-    public static int getNoMax() {
-        return NO_MAX;
     }
 
     public DocumentReference getCreator() {
@@ -74,19 +65,19 @@ public class Event {
         this.desc = desc;
     }
 
-    public Date getStart() {
+    public Timestamp getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(Timestamp start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public Timestamp getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(Timestamp end) {
         this.end = end;
     }
 
@@ -134,4 +125,7 @@ public class Event {
         return attendees;
     }
 
+    public void setAttendees(List<DocumentReference> attendees) {
+        this.attendees = attendees;
+    }
 }

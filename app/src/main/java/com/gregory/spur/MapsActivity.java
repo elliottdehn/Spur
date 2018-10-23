@@ -47,7 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mEventService = new EventService();
 
         setContentView(R.layout.activity_maps);
-        //Button button= (Button)findViewById(R.id.button);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -65,17 +65,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-
         // if the network provider is available
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-
         }
         else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-
         }
 
         // Display the logged in user
@@ -157,10 +152,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onComplete(@NonNull Task<QuerySnapshot> task) {
         if(task.isSuccessful()){
+            Log.d(TAG, "GetEvents returned");
             for (QueryDocumentSnapshot document : task.getResult()){
                 Event event = document.toObject(Event.class);
-                double lat = event.getLocation().getLatitude();
-                double lng = event.getLocation().getLongitude();
+                double lat = event.getLoc().getLatitude();
+                double lng = event.getLoc().getLongitude();
                 String title = event.getTitle();
                 mMap.addMarker(
                         new MarkerOptions()
