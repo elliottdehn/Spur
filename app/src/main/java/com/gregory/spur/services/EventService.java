@@ -1,6 +1,11 @@
 package com.gregory.spur.services;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -14,6 +19,7 @@ import java.util.Map;
 public class EventService {
 
     private FirebaseFirestore db;
+    private static final String TAG = "EventService";
 
     public EventService(){
         FirebaseFirestore.setLoggingEnabled(true);
@@ -25,6 +31,22 @@ public class EventService {
     }
 
     public void createEvent(Event event) {
+        OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Log.d(TAG, "Event created with EXTRA_ID " + documentReference.getId());
+            }
+        };
+        OnFailureListener failureListener = new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Failure creating event: ", e);
+            }
+        };
+        createEvent(event, successListener, failureListener);
+    }
+
+    public void createEvent(Event event, OnSuccessListener<DocumentReference> successListener, OnFailureListener failureListener){
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", event.getName());
         docData.put("desc", event.getDesc());
@@ -37,7 +59,10 @@ public class EventService {
         docData.put("start", event.getStart());
         docData.put("end", event.getEnd());
         //docData.put("attendees",event.getAttendees());
-        db.collection("events").add(docData);
+        db.collection("events")
+                .add(docData)
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
     }
 
     public void updateEvent(String eventId, Event event) {

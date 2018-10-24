@@ -20,7 +20,7 @@ import com.gregory.spur.services.EventService;
 
 public class ViewEventActivity extends AppCompatActivity {
 
-    private static final String EXTRA_EVENT_ID = "com.gregory.spur.event_id";
+    private static final String EXTRA_EVENT_ID = "event_id";
     private static final String TAG = "ViewEventActivity";
     private String mEventId;
     private EventService mEventService;
@@ -56,17 +56,18 @@ public class ViewEventActivity extends AppCompatActivity {
                         } else {
                             // Delete failed, show generic error to user and log real error
                             Log.e(TAG, "Failed to delete event: ", task.getException());
-                            Toast.makeText(getApplicationContext(), "Failed to delete event", Toast.LENGTH_SHORT);
                         }
                     }
                 });
+                Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT);
+                finish();
                 return true;
             case R.id.action_edit:
                 // User chose edit event option, launch the activity to modify the event
-                Intent intent = new Intent(getApplicationContext(), CreateEventActivity.class);
-                intent.putExtra("id", mEventId);
-                intent.putExtra("lat", mEvent.getLoc().getLatitude());
-                intent.putExtra("long", mEvent.getLoc().getLongitude());
+                Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
+                        mEvent.getLoc().getLatitude(),
+                        mEvent.getLoc().getLongitude(),
+                        mEventId);
                 startActivity(intent);
                 return true;
 
