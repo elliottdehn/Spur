@@ -65,6 +65,8 @@ public class ViewEventActivity extends AppCompatActivity {
                 // User chose edit event option, launch the activity to modify the event
                 Intent intent = new Intent(getApplicationContext(), CreateEventActivity.class);
                 intent.putExtra("id", mEventId);
+                intent.putExtra("lat", mEvent.getLoc().getLatitude());
+                intent.putExtra("long", mEvent.getLoc().getLongitude());
                 startActivity(intent);
                 return true;
 
