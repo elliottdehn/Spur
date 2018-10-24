@@ -22,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -35,7 +36,7 @@ import com.gregory.spur.services.EventService;
 import java.io.IOException;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<QuerySnapshot>, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<QuerySnapshot>, LocationListener, GoogleMap.OnMarkerClickListener {
 
 
     private GoogleMap mMap;
@@ -98,18 +99,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
         double lat= location.getLatitude();
         double lon= location.getLongitude();
-        LatLng latlng=new LatLng(lat,lon);
+        LatLng latlng = new LatLng(lat,lon);
         Geocoder geocoder = new Geocoder(getApplicationContext());
         try {
             List<Address> addressList= geocoder.getFromLocation(lat,lon,1);
-            String str =addressList.get(0).getLocality();
-            str +=addressList.get(0).getCountryName();
-            mMap.addMarker(new MarkerOptions().position(latlng).title("Marker in "+ str));
+            mMap.addMarker(new MarkerOptions().position(latlng).title("Your location!"));
+
+            // Get current events from database
             mEventService.getEvents(this);
+
+            // Center map on your location
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 10.8f));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /** Called when the user clicks a marker. */
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+
+        // Retrieve the data from the marker.
+        String eventId = (String) marker.getTag();
+
+        // Check if this is an event marker with an Id
+        if (eventId != null) {
+            // Launch the update event activity for this event
+            Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId);
+            startActivity(intent);
+        }
+
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
+        return false;
     }
 
     @Override
@@ -174,10 +197,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double lat = event.getLoc().getLatitude();
                 double lng = event.getLoc().getLongitude();
                 String title = event.getName();
-                mMap.addMarker(
+                Marker marker = mMap.addMarker(
                         new MarkerOptions()
                                 .position(new LatLng(lat, lng))
                                 .title(title));
+                marker.setTag(document.getId());
             }
         } else {
             Log.e(TAG, "Error getting documents: ", task.getException());
@@ -196,5 +220,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
     }
 }

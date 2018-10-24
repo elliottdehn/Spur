@@ -15,5 +15,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="edit_event">Edit Event</string>
+    <string name="delete_event">Delete Event</string>
 
 </resources>

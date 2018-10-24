@@ -47,7 +47,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapsActivity" />
-        <activity android:name=".CreateEventActivity"></activity>
+        <activity android:name=".CreateEventActivity" />
+        <activity android:name=".ViewEventActivity"></activity>
     </application>
 
 </manifest>
