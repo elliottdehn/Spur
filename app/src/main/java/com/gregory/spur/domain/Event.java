@@ -1,9 +1,9 @@
 package com.gregory.spur.domain;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
-import java.util.Date;
 import java.util.List;
 
 public class Event {
@@ -12,10 +12,10 @@ public class Event {
     public static final int NO_MAX = Integer.MAX_VALUE;
 
     private DocumentReference creator;
-    private String title;
+    private String name;
     private String desc;
-    private Date start;
-    private Date end;
+    private Timestamp start;
+    private Timestamp end;
     private GeoPoint loc;
     private boolean romantic;
     private double min;
@@ -26,11 +26,9 @@ public class Event {
     public Event() {
     }
 
-    public Event(DocumentReference creator, String title, String desc, Date start, Date end,
-                 GeoPoint loc, boolean romantic, double min, double max, String vis,
-                 List<DocumentReference> attendees) {
+    public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc, boolean romantic, double min, double max, String vis, List<DocumentReference> attendees) {
         this.creator = creator;
-        this.title = title;
+        this.name = title;
         this.desc = desc;
         this.start = start;
         this.end = end;
@@ -42,14 +40,6 @@ public class Event {
         this.attendees = attendees;
     }
 
-    public static int getNoMin() {
-        return NO_MIN;
-    }
-
-    public static int getNoMax() {
-        return NO_MAX;
-    }
-
     public DocumentReference getCreator() {
         return creator;
     }
@@ -58,12 +48,12 @@ public class Event {
         this.creator = creator;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDesc() {
@@ -74,19 +64,19 @@ public class Event {
         this.desc = desc;
     }
 
-    public Date getStart() {
+    public Timestamp getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(Timestamp start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public Timestamp getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(Timestamp end) {
         this.end = end;
     }
 
@@ -134,4 +124,7 @@ public class Event {
         return attendees;
     }
 
+    public void setAttendees(List<DocumentReference> attendees) {
+        this.attendees = attendees;
+    }
 }
