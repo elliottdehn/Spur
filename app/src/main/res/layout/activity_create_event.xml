@@ -3,13 +3,16 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ScrollView01"
-    android:layout_width="wrap_content"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:scrollbars="vertical">
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:orientation="vertical"
         android:layout_height="fill_parent">
+
+
 
         <TextView
             android:id="@+id/TextViewName"
@@ -21,7 +24,7 @@
 
         <EditText
             android:id="@+id/EditTextName"
-            android:layout_width="432dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Title"
             android:inputType="textPersonName"></EditText>
@@ -51,7 +54,7 @@
             android:text="Date"
             android:textSize="10pt">
         </TextView>
-
+      
         <DatePicker
             android:id="@+id/DatePickerDate"
             android:layout_width="wrap_content"
@@ -64,7 +67,7 @@
             android:text="Start Time"
             android:textSize="10pt">
         </TextView>
-
+      
         <TimePicker
             android:id="@+id/TimePickerStartTime"
             android:layout_width="wrap_content"
@@ -102,7 +105,10 @@
         </Button>
 
     </LinearLayout>
+
 </ScrollView>
+
+
 
 
 
