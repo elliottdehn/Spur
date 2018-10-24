@@ -111,15 +111,13 @@
         </CheckBox>
 
         <Button
-            android:id="@+id/ButtonSendFeedback"
+            android:id="@+id/ButtonCreate"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_height="wrap_content"
             android:text="CREATE"
-            android:onClick="sendFeedback"
+            android:onClick="callcreate"
             android:layout_width="fill_parent">
         </Button>
-
-
 
     </LinearLayout>
 </ScrollView>
