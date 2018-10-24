@@ -24,11 +24,11 @@ public class EventService {
         db.setFirestoreSettings(settings);
     }
 
-    public void createEvent(Event event, OnCompleteListener<DocumentReference> listener) {
+    public void createEvent(Event event) {
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", event.getName());
         docData.put("desc", event.getDesc());
-        docData.put("creator", event.getCreator());
+        //docData.put("creator", event.getCreator());
         docData.put("loc", event.getLoc());
         docData.put("min", event.getMin());
         docData.put("max", event.getMax());
@@ -36,8 +36,8 @@ public class EventService {
         docData.put("vis", event.getVis());
         docData.put("start", event.getStart());
         docData.put("end", event.getEnd());
-        docData.put("attendees",event.getAttendees());
-        db.collection("events").add(docData).addOnCompleteListener(listener);
+        //docData.put("attendees",event.getAttendees());
+        db.collection("events").add(docData);
     }
 
     public void updateEvent(String eventId, Event event) {
