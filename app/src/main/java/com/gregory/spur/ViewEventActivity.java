@@ -18,7 +18,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.gregory.spur.domain.Event;
 import com.gregory.spur.services.EventService;
 
-public class ViewEventActivity extends AppCompatActivity implements OnCompleteListener<DocumentSnapshot> {
+public class ViewEventActivity extends AppCompatActivity {
 
     private static final String EXTRA_EVENT_ID = "com.gregory.spur.event_id";
     private static final String TAG = "ViewEventActivity";
@@ -42,46 +42,29 @@ public class ViewEventActivity extends AppCompatActivity implements OnCompleteLi
     }
 
     @Override
-    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-        if (task.isSuccessful()) {
-            DocumentSnapshot document = task.getResult();
-            if (document.exists()) {
-                Event event = document.toObject(Event.class);
-                mEvent = event;
-                String title = event.getName();
-                String desc = event.getDesc();
-                mEventTitle.setText(title);
-                mEventDescription.setText(desc);
-            } else {
-                Log.d(TAG, "No such document");
-            }
-        } else {
-            Log.d(TAG, "get failed with ", task.getException());
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                // User chose the "Settings" item, show the app settings UI...
+                // User chose the delete event option, delete the event from the database
+                mEventService.deleteEvent(mEventId, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+                            // Delete successful, return to map activity
+                            Log.d(TAG, "Deleted event " + mEventId);
+                            finish();
+                        } else {
+                            // Delete failed, show generic error to user and log real error
+                            Log.e(TAG, "Failed to delete event: ", task.getException());
+                            Toast.makeText(getApplicationContext(), "Failed to delete event", Toast.LENGTH_SHORT);
+                        }
+                    }
+                });
                 return true;
-
             case R.id.action_edit:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
+                // User chose edit event option, launch the activity to modify the event
                 Intent intent = new Intent(getApplicationContext(), CreateEventActivity.class);
                 intent.putExtra("id", mEventId);
-                GeoPoint location = mEvent.getLoc();
-                intent.putExtra("lat", location.getLatitude());
-                intent.putExtra("long", location.getLongitude());
-                intent.putExtra("name", mEvent.getName());
-                intent.putExtra("desc", mEvent.getDesc());
-                intent.putExtra("start", mEvent.getStart());
-                intent.putExtra("end", mEvent.getEnd());
-                intent.putExtra("romantic", mEvent.isRomantic());
-                intent.putExtra("min", mEvent.getMin());
-                intent.putExtra("max", mEvent.getMax());
                 startActivity(intent);
                 return true;
 
@@ -96,15 +79,36 @@ public class ViewEventActivity extends AppCompatActivity implements OnCompleteLi
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
+
+        // Create the menu from the menu.xml layout file
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
     private void getEventInfo(){
         if(mEventId != null){
-            mEventService.getEvent(mEventId, this);
+            mEventService.getEvent(mEventId, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Event event = document.toObject(Event.class);
+                            mEvent = event;
+                            String title = event.getName();
+                            String desc = event.getDesc();
+                            mEventTitle.setText(title);
+                            mEventDescription.setText(desc);
+                        } else {
+                            Log.e(TAG, "No such document");
+                        }
+                    } else {
+                        Log.e(TAG, "get failed with ", task.getException());
+                    }
+                }
+            });
         } else {
-            Log.d(TAG, "No event id provided to getEventInfo()");
+            Log.e(TAG, "No event id provided to getEventInfo()");
             Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
         }
     }
