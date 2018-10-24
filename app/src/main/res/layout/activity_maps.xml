@@ -8,24 +8,6 @@
     android:layout_height="match_parent"
     tools:context=".MapsActivity">
 
-    <Button
-        android:id="@+id/add_event"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|bottom"
-        android:text="Create Event"
-        android:padding="10dp"
-        android:layout_marginTop="20dp"
-        android:paddingRight="10dp"/>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="               ##SPUR Local Map##            " />
-
-
 </fragment>
 
 

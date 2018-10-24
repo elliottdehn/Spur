@@ -36,7 +36,7 @@ import com.gregory.spur.services.EventService;
 import java.io.IOException;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<QuerySnapshot>, LocationListener, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<QuerySnapshot>, LocationListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener {
 
 
     private GoogleMap mMap;
@@ -52,18 +52,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mEventService = new EventService();
 
         setContentView(R.layout.activity_maps);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-
-        button = (Button) findViewById(R.id.add_event);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent mIntent= new Intent(MapsActivity.this, CreateEventActivity.class);
-                startActivity(mIntent);
-            }
-        });
 
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -220,6 +208,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        EventService es = new EventService();
+        es.getEvents(this);
+        mMap.setOnMapLongClickListener(this);
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Intent intent = new Intent(MapsActivity.this, CreateEventActivity.class);
+        Bundle b = new Bundle();
+        b.putDouble("lat", latLng.latitude); //Your id
+        b.putDouble("long", latLng.longitude);
+        intent.putExtras(b); //Put your id to your next Intent
+        startActivity(intent);
+        finish();
+        
         mMap.setOnMarkerClickListener(this);
     }
 }

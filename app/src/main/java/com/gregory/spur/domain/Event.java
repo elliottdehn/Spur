@@ -4,6 +4,8 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.sql.Time;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Event {
@@ -25,6 +27,19 @@ public class Event {
 
     public Event() {
     }
+
+    //use this constructor when creating the event for now
+    public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc){
+        this.creator = creator;
+        this.name = title;
+        this.desc = desc;
+        this.start = start;
+        this.end = end;
+        this.loc = loc;
+        this.romantic = false;
+        this.min = NO_MIN;
+        this.max = NO_MAX;
+        this.attendees = new ArrayList<DocumentReference>(); }
 
     public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc, boolean romantic, double min, double max, String vis, List<DocumentReference> attendees) {
         this.creator = creator;
