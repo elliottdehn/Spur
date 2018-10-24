@@ -23,22 +23,7 @@
             android:id="@+id/EditTextName"
             android:layout_width="432dp"
             android:layout_height="wrap_content"
-            android:hint="Location Address"
-            android:inputType="textPersonName"></EditText>
-
-        <TextView
-            android:id="@+id/TextViewAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Address"
-            android:textSize="10pt">
-        </TextView>
-
-        <EditText
-            android:id="@+id/EditTextAddress"
-            android:layout_width="432dp"
-            android:layout_height="wrap_content"
-            android:hint="Location Address"
+            android:hint="Title"
             android:inputType="textPersonName"></EditText>
 
         <TextView
@@ -51,9 +36,9 @@
 
 
         <EditText
-            android:id="@+id/EditTextFeedbackBody"
+            android:id="@+id/EditTextDescription"
             android:layout_height="wrap_content"
-            android:hint="Describe you event"
+            android:hint="Describe your event"
             android:inputType="textMultiLine"
             android:lines="3"
             android:layout_width="fill_parent">
@@ -67,12 +52,10 @@
             android:textSize="10pt">
         </TextView>
 
-        <EditText
-            android:id="@+id/EditTextDate"
-            android:layout_width="432dp"
-            android:layout_height="wrap_content"
-            android:hint="dd/mm/yyyy"
-            android:inputType="textPersonName"></EditText>
+        <DatePicker
+            android:id="@+id/DatePickerDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></DatePicker>
 
         <TextView
             android:id="@+id/TextViewStartTime"
@@ -82,12 +65,10 @@
             android:textSize="10pt">
         </TextView>
 
-        <EditText
-            android:id="@+id/EditTextStartTime"
-            android:layout_width="432dp"
-            android:layout_height="wrap_content"
-            android:hint="HH:MM"
-            android:inputType="textPersonName"></EditText>
+        <TimePicker
+            android:id="@+id/TimePickerStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></TimePicker>
 
         <TextView
             android:id="@+id/TextViewEndTime"
@@ -97,24 +78,25 @@
             android:textSize="10pt">
         </TextView>
 
-        <EditText
-            android:id="@+id/EditTextEndTime"
-            android:layout_width="432dp"
-            android:layout_height="wrap_content"
-            android:hint="HH:MM"
-            android:inputType="textPersonName"></EditText>
-        <CheckBox
-            android:id="@+id/CheckBoxResponse"
-            android:layout_height="wrap_content"
-            android:text="Romantic Event"
-            android:layout_width="fill_parent">
-        </CheckBox>
+        <TimePicker
+            android:id="@+id/TimePickerEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></TimePicker>
 
         <Button
             android:id="@+id/ButtonCreate"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_height="wrap_content"
             android:text="CREATE"
+            android:onClick="callcreate"
+            android:layout_width="fill_parent">
+        </Button>
+
+        <Button
+            android:id="@+id/ButtonUpdate"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_height="wrap_content"
+            android:text="UPDATE"
             android:onClick="callcreate"
             android:layout_width="fill_parent">
         </Button>
