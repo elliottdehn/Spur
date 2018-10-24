@@ -43,7 +43,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private EventService mEventService;
     private String TAG="SPURDebug";
-    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,18 +210,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         EventService es = new EventService();
         es.getEvents(this);
         mMap.setOnMapLongClickListener(this);
+        mMap.setOnMarkerClickListener(this);
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        Intent intent = new Intent(MapsActivity.this, CreateEventActivity.class);
-        Bundle b = new Bundle();
-        b.putDouble("lat", latLng.latitude); //Your id
-        b.putDouble("long", latLng.longitude);
-        intent.putExtras(b); //Put your id to your next Intent
+        Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
+                latLng.latitude,
+                latLng.longitude,
+                null);
         startActivity(intent);
-        finish();
-        
-        mMap.setOnMarkerClickListener(this);
     }
 }

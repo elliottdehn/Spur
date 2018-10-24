@@ -1,5 +1,6 @@
 package com.gregory.spur;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -22,18 +23,25 @@ import com.gregory.spur.services.EventService;
 import java.util.Calendar;
 import java.util.Date;
 
-public class CreateEventActivity extends AppCompatActivity implements OnCompleteListener<DocumentSnapshot>, View.OnClickListener {
-    public static final String LONG = "long";
-    public static final String LAT = "lat";
-    public static final String ID = "id";
-    public static final String FIREBASE = "Firebase";
+public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String EXTRA_LONGITUDE = "long";
+    public static final String EXTRA_LATITUDE = "lat";
+    public static final String EXTRA_ID = "id";
+    public static final String TAG = "CreateEventActivity";
 
     private Button mButtonCreate;
     private Button mButtonUpdate;
+    private EditText mTitle;
+    private EditText mDescription;
+    private DatePicker mDatePicker;
+    private TimePicker mStartTime;
+    private TimePicker mEndTime;
 
-    private String id;
-    private double latitude;
-    private double longitude;
+
+    private String mEventId;
+    private double mLatitude;
+    private double mLongitude;
+    private EventService mEventService = new EventService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,24 +52,50 @@ public class CreateEventActivity extends AppCompatActivity implements OnComplete
         setContentView(R.layout.activity_create_event);
         mButtonUpdate = findViewById(R.id.ButtonUpdate);
         mButtonCreate = findViewById(R.id.ButtonCreate);
+        mTitle = findViewById(R.id.EditTextName);
+        mDescription = findViewById(R.id.EditTextDescription);
+        mDatePicker = findViewById(R.id.DatePickerDate);
+        mStartTime = findViewById(R.id.TimePickerStartTime);
+        mEndTime = findViewById(R.id.TimePickerEndTime);
         Bundle extras = getIntent().getExtras();
-        this.latitude = (double) extras.get(LAT);
-        this.longitude = (double) extras.get(LONG);
 
-        if (extras.get("id") != null) {
-            this.id = (String) extras.get(ID);
-            final EventService es = new EventService();
-            es.getEvent(id, this);
-            //update an event
+        // If an event id is provided, we are updating an event
+        mEventId = (String) extras.get(EXTRA_ID);
+        mLatitude = (Double) extras.get(EXTRA_LATITUDE);
+        mLongitude = (Double) extras.get(EXTRA_LONGITUDE);
+
+        if (mEventId != null) {
+            mEventService.getEvent(mEventId, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot document = task.getResult();
+                            if(document.exists()){
+                                Event event = document.toObject(Event.class);
+                                autofillUI(event);
+                            } else {
+                                Log.e(TAG, "Document with Id " + mEventId + " doesn't exist");
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to get event for Id: ", task.getException());
+                        }
+                }
+            });
             mButtonCreate.setVisibility(View.GONE);
-            //prepopulate the fields with existing information
             mButtonUpdate.setOnClickListener(this);
         } else {
-            //create an event
+            // Otherwise we are creating an event
             mButtonUpdate.setVisibility(View.GONE);
-
             mButtonCreate.setOnClickListener(this);
         }
+    }
+
+    public static Intent newIntent(Context packageContext, double lat, double longitude, String eventId){
+        Intent intent = new Intent(packageContext, CreateEventActivity.class);
+        intent.putExtra(EXTRA_ID, eventId);
+        intent.putExtra(EXTRA_LATITUDE, lat);
+        intent.putExtra(EXTRA_LONGITUDE, longitude);
+        return intent;
     }
 
     /**
@@ -87,51 +121,57 @@ public class CreateEventActivity extends AppCompatActivity implements OnComplete
         return date;
     }
 
-    @Override
+    private void autofillUI(Event event){
+        mTitle.setText(event.getName());
+        mDescription.setText(event.getDesc());
 
-    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-        if(task.isSuccessful()){
-            Event event = task.getResult().toObject(Event.class);
+        Timestamp startTime = event.getStart();
+        Timestamp endTime = event.getEnd();
+        Date startDate = startTime.toDate();
+        Date endDate = endTime.toDate();
 
-        } else {
-            Log.d(FIREBASE, "Failed to grab event when updating it");
-        }
+        int year = startDate.getYear();
+        int month = startDate.getMonth();
+        int day = startDate.getDay();
+        mDatePicker.updateDate(year, month, day);
+
+        mStartTime.setHour(startDate.getHours());
+        mStartTime.setMinute(startDate.getMinutes());
+        mEndTime.setHour(endDate.getHours());
+        mEndTime.setMinute(endDate.getMinutes());
+    }
+
+    private Event readEventFromUI(){
+        String eventTitle = mTitle.getText().toString();
+        String description = mDescription.getText().toString();
+        Date start = getDateFromDatePicker(mDatePicker);
+        int startHour = mStartTime.getHour();
+        int startMinute = mStartTime.getMinute();
+        Date end = getDateFromDatePicker(mDatePicker);
+        int endHour = mEndTime.getHour();
+        int endMinute = mEndTime.getMinute();
+        Date startMash = mashDateTime(start, startHour, startMinute);
+        Date endMash = mashDateTime(end, endHour, endMinute);
+        Timestamp startTimeStamp = new Timestamp(startMash);
+        Timestamp endTimeStamp = new Timestamp(endMash);
+        GeoPoint loc = new GeoPoint(mLatitude,mLongitude);
+
+        Event event = new Event(eventTitle, description, startTimeStamp, endTimeStamp, loc);
+        return event;
     }
 
     @Override
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.ButtonCreate:
-
-                EventService es = new EventService();
-
-                View layout = v.getRootView();
-                EditText title = layout.findViewById(R.id.EditTextName);
-                EditText desc = layout.findViewById(R.id.EditTextDescription);
-                DatePicker date = layout.findViewById(R.id.DatePickerDate);
-                TimePicker startTime = layout.findViewById(R.id.TimePickerStartTime);
-                TimePicker endTime = layout.findViewById(R.id.TimePickerEndTime);
-
-                String eventTitle = title.getText().toString();
-                String description = desc.getText().toString();
-                Date start = getDateFromDatePicker(date);
-                int startHour = startTime.getHour();
-                int startMinute = startTime.getMinute();
-                Date end = getDateFromDatePicker(date);
-                int endHour = endTime.getHour();
-                int endMinute = endTime.getMinute();
-                Date startMash = mashDateTime(start, startHour, startMinute);
-                Date endMash = mashDateTime(end, endHour, endMinute);
-                Timestamp startTimeStamp = new Timestamp(startMash);
-                Timestamp endTimeStamp = new Timestamp(endMash);
-                GeoPoint loc = new GeoPoint(latitude,longitude);
-                //now create an event with:
-
-                Event event = new Event(eventTitle, description, startTimeStamp, endTimeStamp, loc);
-                es.createEvent(event);
-
+                Event newEvent = readEventFromUI();
+                mEventService.createEvent(newEvent);
+                finish();
                 break;
             case R.id.ButtonUpdate:
+                Event modifiedEvent = readEventFromUI();
+                mEventService.updateEvent(mEventId, modifiedEvent);
+                finish();
                 break;
         }
     }
