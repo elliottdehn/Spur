@@ -28,7 +28,18 @@ public class Event {
     public Event() {
     }
 
-    //use this constructor when creating the event for now
+    //use this constructor for connectivity demonstration
+    public Event(String title, String desc, Timestamp start, Timestamp end, GeoPoint loc){
+        this.name = title;
+        this.desc = desc;
+        this.start = start;
+        this.end = end;
+        this.loc = loc;
+        this.romantic = false;
+        this.min = NO_MIN;
+        this.max = NO_MAX; }
+
+    //use this constructor once users are set up
     public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc){
         this.creator = creator;
         this.name = title;
