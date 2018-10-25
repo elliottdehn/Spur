@@ -27,6 +27,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     public static final String EXTRA_LONGITUDE = "long";
     public static final String EXTRA_LATITUDE = "lat";
     public static final String EXTRA_ID = "id";
+    private static final int REQUEST_CODE_CREATE_EVENT = 0;
     public static final String TAG = "CreateEventActivity";
 
     private Button mButtonCreate;
@@ -166,11 +167,17 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
             case R.id.ButtonCreate:
                 Event newEvent = readEventFromUI();
                 mEventService.createEvent(newEvent);
+                Intent creationData = new Intent();
+                creationData.putExtra("event_created", true);
+                setResult(RESULT_OK, creationData);
                 finish();
                 break;
             case R.id.ButtonUpdate:
                 Event modifiedEvent = readEventFromUI();
                 mEventService.updateEvent(mEventId, modifiedEvent);
+                Intent modificationData = new Intent();
+                modificationData.putExtra("event_modified", true);
+                setResult(RESULT_OK, modificationData);
                 finish();
                 break;
         }
