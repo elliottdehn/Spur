@@ -1,6 +1,7 @@
 package com.gregory.spur;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,22 +36,23 @@ import com.gregory.spur.domain.Event;
 import com.gregory.spur.services.EventService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<QuerySnapshot>, LocationListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMyLocationButtonClickListener {
 
+    private static final String TAG = "SPURDebug";
+    private static final int REQUEST_CODE_EVENT_CHANGE = 0;
 
     private GoogleMap mMap;
     private LocationManager locationManager;
-    private EventService mEventService;
-    private String TAG="SPURDebug";
+    private EventService mEventService = new EventService();
+    private ArrayList<Marker> mMarkers = new ArrayList<Marker>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mEventService = new EventService();
-
         setContentView(R.layout.activity_maps);
 
 
@@ -87,19 +90,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double lat= location.getLatitude();
         double lon= location.getLongitude();
         LatLng latlng = new LatLng(lat,lon);
-        Geocoder geocoder = new Geocoder(getApplicationContext());
-        try {
-            List<Address> addressList= geocoder.getFromLocation(lat,lon,1);
-            mMap.addMarker(new MarkerOptions().position(latlng).title("Your location!"));
+        mMap.addMarker(new MarkerOptions().position(latlng).title("Your location!"));
 
-            // Get current events from database
-            mEventService.getEvents(this);
+        refreshEvents();
 
-            // Center map on your location
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 10.8f));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Center map on your location
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 10.8f));
     }
 
     /** Called when the user clicks a marker. */
@@ -113,7 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (eventId != null) {
             // Launch the update event activity for this event
             Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
         }
 
         // Return false to indicate that we have not consumed the event and that we wish
@@ -135,6 +131,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        if(requestCode == REQUEST_CODE_EVENT_CHANGE){
+            if(data == null){
+                return;
+            }
+
+            if(data.getBooleanExtra("event_deleted", false)){
+                String deletedId = data.getStringExtra("deleted_id");
+                for (int i = 0; i < mMarkers.size(); i++){
+                    Marker currentMarker = mMarkers.get(i);
+                    String currentId = (String) currentMarker.getTag();
+                    if (currentId != null && currentId == deletedId){
+                        currentMarker.remove();
+                        mMarkers.remove(i);
+                        break;
+                    }
+                }
+                refreshEvents();
+            }
+
+            if(data.getBooleanExtra("event_created", false)){
+                refreshEvents();
+            }
+        }
     }
 
     @Override
@@ -175,26 +202,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d(TAG, "onDestroy() has been called");
     }
 
-    @Override
-    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-        if(task.isSuccessful()){
-            Log.d(TAG, "GetEvents returned");
-            for (QueryDocumentSnapshot document : task.getResult()){
-                Event event = document.toObject(Event.class);
-                double lat = event.getLoc().getLatitude();
-                double lng = event.getLoc().getLongitude();
-                String title = event.getName();
-                Marker marker = mMap.addMarker(
-                        new MarkerOptions()
-                                .position(new LatLng(lat, lng))
-                                .title(title));
-                marker.setTag(document.getId());
-            }
-        } else {
-            Log.e(TAG, "Error getting documents: ", task.getException());
-        }
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -207,10 +214,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        EventService es = new EventService();
-        es.getEvents(this);
+        refreshEvents();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
+        }
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
     }
 
     @Override
@@ -219,6 +244,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 latLng.latitude,
                 latLng.longitude,
                 null);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
+    }
+
+    private void refreshEvents(){
+        mEventService.getEvents(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful() && mMap != null){
+                    Log.d(TAG, "GetEvents returned");
+                    for (QueryDocumentSnapshot document : task.getResult()){
+                        Event event = document.toObject(Event.class);
+                        double lat = event.getLoc().getLatitude();
+                        double lng = event.getLoc().getLongitude();
+                        String title = event.getName();
+                        Marker marker = mMap.addMarker(
+                                new MarkerOptions()
+                                        .position(new LatLng(lat, lng))
+                                        .title(title));
+                        marker.setTag(document.getId());
+                        mMarkers.add(marker);
+                    }
+                } else {
+                    Log.e(TAG, "Error getting documents: ", task.getException());
+                }
+            }
+        });
     }
 }

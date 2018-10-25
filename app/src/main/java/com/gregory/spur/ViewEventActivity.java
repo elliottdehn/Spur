@@ -1,5 +1,6 @@
 package com.gregory.spur;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -20,6 +21,7 @@ import com.gregory.spur.services.EventService;
 
 public class ViewEventActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE_MODIFY_EVENT = 0;
     private static final String EXTRA_EVENT_ID = "event_id";
     private static final String TAG = "ViewEventActivity";
     private String mEventId;
@@ -59,8 +61,16 @@ public class ViewEventActivity extends AppCompatActivity {
                         }
                     }
                 });
-                Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT);
-                finish();
+
+                if(mEvent != null){
+                    Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT).show();
+                    Intent deleteData = new Intent();
+                    deleteData.putExtra("event_deleted", true);
+                    deleteData.putExtra("deleted_id", mEventId);
+                    setResult(RESULT_OK, deleteData);
+                    finish();
+                }
+
                 return true;
             case R.id.action_edit:
                 // User chose edit event option, launch the activity to modify the event
@@ -68,7 +78,7 @@ public class ViewEventActivity extends AppCompatActivity {
                         mEvent.getLoc().getLatitude(),
                         mEvent.getLoc().getLongitude(),
                         mEventId);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
                 return true;
 
             default:
@@ -86,6 +96,22 @@ public class ViewEventActivity extends AppCompatActivity {
         // Create the menu from the menu.xml layout file
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        if(requestCode == REQUEST_CODE_MODIFY_EVENT){
+            if(data == null){
+                return;
+            }
+            if(data.getBooleanExtra("event_modified", false)){
+                getEventInfo();
+            }
+        }
     }
 
     private void getEventInfo(){
