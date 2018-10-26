@@ -23,7 +23,7 @@ public class EventService {
 
     public EventService(){
         FirebaseFirestore.setLoggingEnabled(true);
-        this.db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
@@ -34,7 +34,7 @@ public class EventService {
         OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "Event created with EXTRA_ID " + documentReference.getId());
+                Log.d(TAG, "Event created with Id " + documentReference.getId());
             }
         };
         OnFailureListener failureListener = new OnFailureListener() {
