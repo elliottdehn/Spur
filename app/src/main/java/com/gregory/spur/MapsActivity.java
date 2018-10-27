@@ -95,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         refreshEvents();
 
         // Center map on your location
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 10.8f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 14.8f));
     }
 
     /** Called when the user clicks a marker. */
