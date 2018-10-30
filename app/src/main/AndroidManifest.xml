@@ -49,8 +49,7 @@
         </activity>
         <activity android:name=".MapsActivity" />
         <activity android:name=".CreateEventActivity" />
-        <activity android:name=".ViewEventActivity" />
-        <activity android:name=".ProfileView"></activity>
+        <activity android:name=".ViewEventActivity"></activity>
     </application>
 
 </manifest>
