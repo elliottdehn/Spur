@@ -27,5 +27,17 @@
             android:text="TextView"
             android:textSize="20sp"
             tools:text="Event Description" />
+
+        <TextView
+            android:id="@+id/event_Creator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="Creator's Name" />
+
+
+
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
