@@ -95,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         refreshEvents();
 
         // Center map on your location
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 10.8f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 14.8f));
     }
 
     /** Called when the user clicks a marker. */
@@ -145,16 +145,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             if(data.getBooleanExtra("event_deleted", false)){
-                String deletedId = data.getStringExtra("deleted_id");
-                for (int i = 0; i < mMarkers.size(); i++){
-                    Marker currentMarker = mMarkers.get(i);
-                    String currentId = (String) currentMarker.getTag();
-                    if (currentId != null && currentId == deletedId){
-                        currentMarker.remove();
-                        mMarkers.remove(i);
-                        break;
-                    }
-                }
+                // If an event was deleted, clear the map of markers and refresh
+                mMarkers.clear();
+                mMap.clear();
                 refreshEvents();
             }
 

@@ -23,7 +23,7 @@ public class EventService {
 
     public EventService(){
         FirebaseFirestore.setLoggingEnabled(true);
-        this.db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
@@ -34,7 +34,7 @@ public class EventService {
         OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "Event created with EXTRA_ID " + documentReference.getId());
+                Log.d(TAG, "Event created with Id " + documentReference.getId());
             }
         };
         OnFailureListener failureListener = new OnFailureListener() {
@@ -50,7 +50,7 @@ public class EventService {
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", event.getName());
         docData.put("desc", event.getDesc());
-        //docData.put("creator", event.getCreator());
+        docData.put("creator", event.getCreator());
         docData.put("loc", event.getLoc());
         docData.put("min", event.getMin());
         docData.put("max", event.getMax());
@@ -58,7 +58,7 @@ public class EventService {
         docData.put("vis", event.getVis());
         docData.put("start", event.getStart());
         docData.put("end", event.getEnd());
-        //docData.put("attendees",event.getAttendees());
+        docData.put("attendees",event.getAttendees());
         db.collection("events")
                 .add(docData)
                 .addOnSuccessListener(successListener)
