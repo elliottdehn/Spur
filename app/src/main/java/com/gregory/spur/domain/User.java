@@ -10,6 +10,11 @@ public class User {
     private String gender;
     private double rating;
     private String username;
+    private String authId;
+
+    public User(){
+
+    }
 
     public User(double age, String bio, String city, String fName, String lName, String gender, double rating, String username){
         this.age = age;
@@ -20,6 +25,14 @@ public class User {
         this.gender = gender;
         this.rating = rating;
         this.username = username;
+    }
+
+    public String getAuthId() {
+        return authId;
+    }
+
+    public void setAuthId(String authId) {
+        this.authId = authId;
     }
 
     public void setAge(double age) {

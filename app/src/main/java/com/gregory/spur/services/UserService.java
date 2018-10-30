@@ -59,7 +59,7 @@ public class UserService {
         data.put("gender", user.getGender());
         data.put("username", user.getUsername());
         data.put("auth_id", firebaseAuthId);
-        db.collection("events")
+        db.collection("users")
                 .add(data)
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
