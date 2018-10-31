@@ -17,7 +17,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.gregory.spur.domain.Event;
+import com.gregory.spur.domain.User;
 import com.gregory.spur.services.EventService;
+import com.gregory.spur.services.UserService;
 
 public class ViewEventActivity extends AppCompatActivity {
 
@@ -25,10 +27,13 @@ public class ViewEventActivity extends AppCompatActivity {
     private static final String EXTRA_EVENT_ID = "event_id";
     private static final String TAG = "ViewEventActivity";
     private String mEventId;
+    private String mCreator;
     private EventService mEventService;
+    private UserService mUserService;
     private Event mEvent;
     private TextView mEventTitle;
     private TextView mEventDescription;
+    private  TextView mEventCreator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +41,19 @@ public class ViewEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_event);
 
         mEventService = new EventService();
+        mUserService = new UserService();
+
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
         getEventInfo();
 
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
+
+        mEventCreator = findViewById(R.id.event_Creator);
+
+
+
+
     }
 
     @Override
@@ -124,6 +137,8 @@ public class ViewEventActivity extends AppCompatActivity {
                         if (document.exists()) {
                             Event event = document.toObject(Event.class);
                             mEvent = event;
+                            mCreator = event.getCreator().getId();
+                            getCreatorInfo();
                             String title = event.getName();
                             String desc = event.getDesc();
                             mEventTitle.setText(title);
@@ -141,6 +156,39 @@ public class ViewEventActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
         }
     }
+
+
+
+
+    private void getCreatorInfo(){
+        if(mCreator != null){
+            mUserService.getUser(mCreator, new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            User user = document.toObject(User.class);
+                            mEventCreator.setText(user.getUsername());
+                        } else {
+                            Log.e(TAG, "No such document");
+                        }
+                    } else {
+                        Log.e(TAG, "get failed with ", task.getException());
+                    }
+                }
+            });
+        } else {
+            Log.e(TAG, "No event id provided to getEventInfo()");
+            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
+        }
+    }
+
+
+
+
+
+
 
     public static Intent newIntent(Context packageContext, String eventId){
         Intent intent = new Intent(packageContext, ViewEventActivity.class);

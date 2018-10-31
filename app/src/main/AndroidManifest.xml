@@ -53,6 +53,7 @@
         <activity
             android:name=".CreateUserActivity"
             android:noHistory="true"></activity>
+        <activity android:name=".ProfileView" />
     </application>
 
 </manifest>
