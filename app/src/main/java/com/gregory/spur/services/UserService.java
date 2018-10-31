@@ -33,6 +33,16 @@ public class UserService {
         db.setFirestoreSettings(settings);
     }
 
+    public boolean isValid(User user){
+        if (user.getAuthId() != null && user.getBio() != null && user.getCity() != null
+                && user.getFirst() != null && user.getLast() != null && user.getGender() != null
+                && user.getUsername() != null && user.getAge() > 0.0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void createUser(User user, String firebaseAuthId){
         OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
             @Override

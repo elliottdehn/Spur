@@ -15,15 +15,6 @@ public class User {
 
     }
 
-    public boolean isValid(){
-        if (authId != null && bio != null && city != null
-                && first != null && last != null && gender != null && username != null && age > 0.0){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public double getAge() {
         return age;
     }

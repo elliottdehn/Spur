@@ -110,7 +110,7 @@ public class CreateUserActivity extends AppCompatActivity {
 
     private void saveProfile(){
         User data = readFromUI();
-        if (data.isValid()){
+        if (mUserService.isValid(data)){
             mUserService.updateUser(mUserId, data);
             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);

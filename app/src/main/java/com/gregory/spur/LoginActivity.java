@@ -182,7 +182,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     String userId = userSnapshot.getId();
                     User databaseUser = userSnapshot.toObject(User.class);
 
-                    if (databaseUser.isValid()) {
+                    if (mUserService.isValid(databaseUser)) {
                         Log.d("LOGIN", "Database user is valid, launching maps activity");
                         launchMap();
                     } else {
