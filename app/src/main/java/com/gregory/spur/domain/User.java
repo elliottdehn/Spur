@@ -5,10 +5,9 @@ public class User {
     private double age;
     private String bio;
     private String city;
-    private String fName;
-    private String lName;
+    private String first;
+    private String last;
     private String gender;
-    private double rating;
     private String username;
     private String authId;
 
@@ -16,24 +15,69 @@ public class User {
 
     }
 
-    public User(double age, String bio, String city, String fName, String lName, String gender, double rating, String username){
-        this.age = age;
-        this.bio = bio;
-        this.city = city;
-        this.fName = fName;
-        this.lName = lName;
-        this.gender = gender;
-        this.rating = rating;
-        this.username = username;
-    }
-
     public boolean isValid(){
         if (authId != null && bio != null && city != null
-                && fName != null && lName != null && gender != null && username != null){
+                && first != null && last != null && gender != null && username != null && age > 0.0){
             return true;
         } else {
             return false;
         }
+    }
+
+    public double getAge() {
+        return age;
+    }
+
+    public void setAge(double age) {
+        this.age = age;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getFirst() {
+        return first;
+    }
+
+    public void setFirst(String first) {
+        this.first = first;
+    }
+
+    public String getLast() {
+        return last;
+    }
+
+    public void setLast(String last) {
+        this.last = last;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getAuthId() {
@@ -43,69 +87,4 @@ public class User {
     public void setAuthId(String authId) {
         this.authId = authId;
     }
-
-    public void setAge(double age) {
-        this.age = age;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setfName(String fName) {
-        this.fName = fName;
-    }
-
-    public void setlName(String lName) {
-        this.lName = lName;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public double getAge() {
-        return age;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getfName() {
-        return fName;
-    }
-
-    public String getlName() {
-        return lName;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
 }

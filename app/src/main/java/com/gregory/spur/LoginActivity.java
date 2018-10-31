@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.e("LOGIN", "Create auth user failed: ", task.getException());
 
                 // If sign in fails, display a message to the user.
-                Toast.makeText(LoginActivity.this, "Login failed: " + e.getMessage(),
+                Toast.makeText(LoginActivity.this, "Register user failed: " + e.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
             success = task.isSuccessful();
@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // If sign in fails, display a message to the user.
                 FirebaseAuthException e = (FirebaseAuthException)task.getException();
                 Log.w("LOGIN", "signInWithEmail:failure", e);
-                Toast.makeText(LoginActivity.this, e.getMessage(),
+                Toast.makeText(LoginActivity.this, "Login failed: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
             success = task.isSuccessful();
@@ -146,11 +146,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
@@ -159,7 +155,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void tryLaunchMap(){
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    private void launchMap(){
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
@@ -183,7 +184,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     if (databaseUser.isValid()) {
                         Log.d("LOGIN", "Database user is valid, launching maps activity");
-                        tryLaunchMap();
+                        launchMap();
                     } else {
                         // Send user to profile screen to complete their invalid profile
                         Log.d("LOGIN", "Database user is invalid, launching user profile activity");

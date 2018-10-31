@@ -50,7 +50,9 @@
         <activity android:name=".MapsActivity" />
         <activity android:name=".CreateEventActivity" />
         <activity android:name=".ViewEventActivity" />
-        <activity android:name=".CreateUserActivity"></activity>
+        <activity
+            android:name=".CreateUserActivity"
+            android:noHistory="true"></activity>
     </application>
 
 </manifest>
