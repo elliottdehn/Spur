@@ -48,13 +48,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private EventService mEventService = new EventService();
     private ArrayList<Marker> mMarkers = new ArrayList<Marker>();
+    Button button;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        button = (Button) findViewById(R.id.Buttonlogout);
+        button.setOnClickListener(new View.OnClickListener() {
 
+            public void onClick(View v) {
+               FirebaseAuth.getInstance().signOut();
+
+               if( FirebaseAuth.getInstance().getCurrentUser()==null){
+                   Toast.makeText(getApplicationContext(), "User Logged Out " , Toast.LENGTH_LONG).show();
+                   finish();
+                }
+                else{
+                   Toast.makeText(getApplicationContext(), "Logout Failed! " , Toast.LENGTH_LONG).show();
+               }
+
+
+            }
+        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
