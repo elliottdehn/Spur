@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -39,6 +38,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.UserService;
 
@@ -70,6 +71,48 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String mAuthId;
+    private boolean success = false;
+
+    private OnCompleteListener<AuthResult> registerListener = new OnCompleteListener<AuthResult>(){
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task){
+            if (task.isSuccessful()) {
+                FirebaseUser authUser = mAuth.getCurrentUser();
+                mAuthId = authUser.getUid();
+                Log.d("LOGIN", "Created auth user with ID " + mAuthId);
+                createNewUser();
+            } else {
+                FirebaseAuthException e = (FirebaseAuthException)task.getException();
+                Log.e("LOGIN", "Create auth user failed: ", task.getException());
+
+                // If sign in fails, display a message to the user.
+                Toast.makeText(LoginActivity.this, "Login failed: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+            success = task.isSuccessful();
+        }
+    };
+
+    private OnCompleteListener<AuthResult> signInListener = new OnCompleteListener<AuthResult>() {
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task) {
+            if (task.isSuccessful()) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d("LOGIN", "signInWithEmail:success");
+                final FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                mAuthId = firebaseUser.getUid();
+                onAuthLoginSuccess();
+            } else {
+                // If sign in fails, display a message to the user.
+                FirebaseAuthException e = (FirebaseAuthException)task.getException();
+                Log.w("LOGIN", "signInWithEmail:failure", e);
+                Toast.makeText(LoginActivity.this, e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+            success = task.isSuccessful();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,15 +153,76 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        launchMap(currentUser);
+        if(currentUser != null){
+            mAuthId = currentUser.getUid();
+            onAuthLoginSuccess();
+        }
     }
 
-    private void launchMap(@Nullable FirebaseUser user){
-        if(user != null){
-            // If the user is logged in, launch the maps activity
-            Intent intent = new Intent(this, MapsActivity.class);
-            startActivity(intent);
-        }
+    private void tryLaunchMap(){
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
+
+    private void onAuthLoginSuccess(){
+        mUserService.getLoggedInUser(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                // This query should only return the logged in user, no others
+                if (queryDocumentSnapshots.size() == 0) {
+                    // Logged in user doesn't exist, create them
+                    Log.d("LOGIN", "Logged in user has no database user, creating one");
+                    createNewUser();
+                } else {
+                    // Logged in user exists, check if it's valid
+                    Log.d("LOGIN", "Logged in user has database user");
+                    List<DocumentSnapshot> users = queryDocumentSnapshots.getDocuments();
+                    DocumentSnapshot userSnapshot = users.get(0);
+                    String userId = userSnapshot.getId();
+                    User databaseUser = userSnapshot.toObject(User.class);
+
+                    if (databaseUser.isValid()) {
+                        Log.d("LOGIN", "Database user is valid, launching maps activity");
+                        tryLaunchMap();
+                    } else {
+                        // Send user to profile screen to complete their invalid profile
+                        Log.d("LOGIN", "Database user is invalid, launching user profile activity");
+                        launchEditProfile(userId);
+                    }
+                }
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("LOGIN", "geLoggedInUser failed: ", e);
+                Toast.makeText(LoginActivity.this, e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void launchEditProfile(String userId){
+        Intent intent = CreateUserActivity.newIntent(getApplicationContext(), mAuthId, userId);
+        startActivity(intent);
+    }
+
+    private void createNewUser(){
+        mUserService.createUser(new User(), mAuthId,
+                new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("LOGIN", "Created database user with ID " + documentReference.getId());
+                        launchEditProfile(documentReference.getId());
+                    }
+                },
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("LOGIN", "Failure creating database user: ", e);
+                        Toast.makeText(getApplicationContext(), "Error creating database user: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
     }
 
     private void populateAutoComplete() {
@@ -160,7 +264,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }
     }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -289,6 +392,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
+    private void createAccount(String email, String password){
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(registerListener);
+    }
+
+    private void signInWithEmailAndPassword(String email, String password){
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(signInListener);
+    }
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -304,11 +416,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
         private final boolean mCreate;
+
 
         UserLoginTask(String email, String password, boolean create) {
             mEmail = email;
@@ -339,80 +452,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void createAccount(String email, String password){
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(registerListener);
-    }
-
-    private OnCompleteListener<AuthResult> registerListener = new OnCompleteListener<AuthResult>(){
-        @Override
-        public void onComplete(@NonNull Task<AuthResult> task){
-            if (task.isSuccessful()) {
-                FirebaseUser authUser = mAuth.getCurrentUser();
-                Log.d("LOGIN", "Created auth user with ID " + authUser.getUid());
-                User userData = new User();
-                userData.setAge(23);
-                userData.setBio("a sample bio for testing");
-                userData.setCity("Columbus");
-                userData.setfName("test");
-                userData.setlName("user");
-                userData.setGender("male");
-                userData.setRating(0.90);
-                userData.setUsername("testUser123");
-                mUserService.createUser(userData, authUser.getUid(),
-                        createUserSuccessListener, createUserFailureListener);
-                launchMap(authUser);
-            } else {
-                FirebaseAuthException e = (FirebaseAuthException)task.getException();
-                Log.e("LOGIN", "Create auth user failed: ", task.getException());
-
-                // If sign in fails, display a message to the user.
-                Toast.makeText(LoginActivity.this, e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-            success = task.isSuccessful();
-            // ...
-        }
-    };
-
-    private OnSuccessListener<DocumentReference> createUserSuccessListener = new OnSuccessListener<DocumentReference>() {
-        @Override
-        public void onSuccess(DocumentReference documentReference) {
-            Log.d("LOGIN", "Created database user with ID " + documentReference.getId());
-        }
-    };
-
-    private OnFailureListener createUserFailureListener = new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            Log.e("LOGIN", "Failure creating database user: ", e);
-        }
-    };
-
-    private boolean success = false;
-
-    private void signInWithEmailAndPassword(String email, String password){
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d("LOGIN", "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            launchMap(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            FirebaseAuthException e = (FirebaseAuthException)task.getException();
-                            Log.w("LOGIN", "signInWithEmail:failure", e);
-                            Toast.makeText(LoginActivity.this, e.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        success = task.isSuccessful();
-                        // ...
-                    }
-                });
-    }
-
 }
+
+
 

@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.gregory.spur.domain.User;
 
@@ -30,6 +31,8 @@ public class CreateUserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user);
+
+        Toast.makeText(getApplicationContext(), "Your profile is missing some information, please edit it", Toast.LENGTH_LONG).show();
 
         mAuthId = getIntent().getStringExtra(EXTRA_AUTH_ID);
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);

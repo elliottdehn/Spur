@@ -27,6 +27,15 @@ public class User {
         this.username = username;
     }
 
+    public boolean isValid(){
+        if (authId != null && bio != null && city != null
+                && fName != null && lName != null && gender != null && username != null){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public String getAuthId() {
         return authId;
     }
