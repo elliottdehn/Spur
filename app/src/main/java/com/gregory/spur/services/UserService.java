@@ -43,6 +43,10 @@ public class UserService {
         }
     }
 
+    public DocumentReference createRefToUser(String userId){
+        return db.collection("users").document(userId);
+    }
+
     public void createUser(User user, String firebaseAuthId){
         OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
             @Override

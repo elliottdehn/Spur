@@ -2,6 +2,7 @@ package com.gregory.spur;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -43,11 +44,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = "SPURDebug";
     private static final int REQUEST_CODE_EVENT_CHANGE = 0;
+    private static final String EXTRA_USER_ID = "user_id";
 
     private GoogleMap mMap;
     private LocationManager locationManager;
     private EventService mEventService = new EventService();
     private ArrayList<Marker> mMarkers = new ArrayList<Marker>();
+    private String mUserId;
     Button button;
 
 
@@ -55,6 +58,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
+
         button = (Button) findViewById(R.id.Buttonlogout);
         button.setOnClickListener(new View.OnClickListener() {
 
@@ -102,6 +108,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(getApplicationContext(), "Logged in user: " + currentUser.getEmail(), Toast.LENGTH_LONG).show();
     }
 
+    public static Intent newIntent(Context packageContext, String userId){
+        Intent intent = new Intent(packageContext, MapsActivity.class);
+        intent.putExtra(EXTRA_USER_ID, userId);
+        return intent;
+    }
+
     @Override
     public void onLocationChanged(Location location) {
         double lat= location.getLatitude();
@@ -125,7 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Check if this is an event marker with an Id
         if (eventId != null) {
             // Launch the update event activity for this event
-            Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId);
+            Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId, mUserId);
             startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
         }
 
@@ -253,7 +265,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
                 latLng.latitude,
                 latLng.longitude,
-                null);
+                null,
+                mUserId);
         startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
     }
 

@@ -25,9 +25,11 @@ public class ViewEventActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_MODIFY_EVENT = 0;
     private static final String EXTRA_EVENT_ID = "event_id";
+    private static final String EXTRA_USER_ID = "user_id";
     private static final String TAG = "ViewEventActivity";
     private String mEventId;
     private String mCreator;
+    private String mUserId;
     private EventService mEventService;
     private UserService mUserService;
     private Event mEvent;
@@ -43,6 +45,7 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventService = new EventService();
         mUserService = new UserService();
 
+        mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
         getEventInfo();
 
@@ -50,10 +53,6 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventDescription = findViewById(R.id.event_description);
 
         mEventCreator = findViewById(R.id.event_Creator);
-
-
-
-
     }
 
     @Override
@@ -90,7 +89,8 @@ public class ViewEventActivity extends AppCompatActivity {
                 Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
                         mEvent.getLoc().getLatitude(),
                         mEvent.getLoc().getLongitude(),
-                        mEventId);
+                        mEventId,
+                        mUserId);
                 startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
                 return true;
 
@@ -153,12 +153,9 @@ public class ViewEventActivity extends AppCompatActivity {
             });
         } else {
             Log.e(TAG, "No event id provided to getEventInfo()");
-            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
+            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
 
     private void getCreatorInfo(){
         if(mCreator != null){
@@ -179,20 +176,15 @@ public class ViewEventActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.e(TAG, "No event id provided to getEventInfo()");
-            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
+            Log.e(TAG, "No creator id provided to getCreatorInfo()");
+            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT).show();
         }
     }
 
-
-
-
-
-
-
-    public static Intent newIntent(Context packageContext, String eventId){
+    public static Intent newIntent(Context packageContext, String eventId, String userId){
         Intent intent = new Intent(packageContext, ViewEventActivity.class);
         intent.putExtra(EXTRA_EVENT_ID, eventId);
+        intent.putExtra(EXTRA_USER_ID, userId);
         return intent;
     }
 }

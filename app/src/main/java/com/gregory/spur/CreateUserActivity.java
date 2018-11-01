@@ -20,6 +20,8 @@ import com.gregory.spur.domain.Event;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.UserService;
 
+import java.util.Map;
+
 public class CreateUserActivity extends AppCompatActivity {
 
     private static final String TAG = "CreateUserActivity";
@@ -112,7 +114,7 @@ public class CreateUserActivity extends AppCompatActivity {
         User data = readFromUI();
         if (mUserService.isValid(data)){
             mUserService.updateUser(mUserId, data);
-            Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+            Intent intent = MapsActivity.newIntent(getApplicationContext(), mUserId);
             startActivity(intent);
         } else {
             Log.e(TAG, "User data not valid, aborting update");

@@ -33,6 +33,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.common.collect.Maps;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -160,8 +161,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStart();
     }
 
-    private void launchMap(){
-        Intent intent = new Intent(this, MapsActivity.class);
+    private void launchMap(String userId){
+        Intent intent = MapsActivity.newIntent(getApplicationContext(), userId);
         startActivity(intent);
     }
 
@@ -184,7 +185,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     if (mUserService.isValid(databaseUser)) {
                         Log.d("LOGIN", "Database user is valid, launching maps activity");
-                        launchMap();
+                        launchMap(userId);
                     } else {
                         // Send user to profile screen to complete their invalid profile
                         Log.d("LOGIN", "Database user is invalid, launching user profile activity");
