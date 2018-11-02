@@ -38,8 +38,9 @@ public class ViewEventActivity extends AppCompatActivity {
     private TextView mEventTitle;
     private TextView mEventDescription;
     private TextView mEventCreator;
-    private Button mDelete;
-    private Button mEdit;
+    private MenuItem mDelete;
+    private MenuItem mEdit;
+    private MenuItem mAttendEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +107,11 @@ public class ViewEventActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
                 return true;
 
+            case R.id.action_attend:
+                // User chose attend event option, add them as an attendee of the event
+                Toast.makeText(getApplicationContext(), "You are now attending the event", Toast.LENGTH_SHORT).show();
+                return true;
+
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -120,9 +126,24 @@ public class ViewEventActivity extends AppCompatActivity {
 
         // Create the menu from the menu.xml layout file
         getMenuInflater().inflate(R.menu.menu, menu);
-        mDelete = findViewById(R.id.action_delete);
-        mEdit = findViewById(R.id.action_edit);
+        mDelete = menu.findItem(R.id.action_delete);
+        mEdit = menu.findItem(R.id.action_edit);
+        mAttendEvent = menu.findItem(R.id.action_attend);
+
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu){
+
+        if(!isUserEventCreator()){
+            mDelete.setVisible(false);
+            mEdit.setVisible(false);
+        } else {
+            mAttendEvent.setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -152,6 +173,7 @@ public class ViewEventActivity extends AppCompatActivity {
                             Event event = document.toObject(Event.class);
                             mEvent = event;
                             mCreatorId = event.getCreator().getId();
+                            invalidateOptionsMenu();
                             getCreatorInfo();
                             String title = event.getName();
                             String desc = event.getDesc();

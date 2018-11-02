@@ -28,5 +28,6 @@
     <string name="save_profile">Save Profile</string>
     <string name="edit_user_profile">Edit User Profile</string>
     <string name="bio">Bio</string>
+    <string name="attend">Attend Event</string>
 
 </resources>
