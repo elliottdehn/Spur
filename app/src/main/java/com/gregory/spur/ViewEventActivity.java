@@ -9,31 +9,38 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.GeoPoint;
 import com.gregory.spur.domain.Event;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.EventService;
 import com.gregory.spur.services.UserService;
 
+import java.util.Objects;
+
 public class ViewEventActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_MODIFY_EVENT = 0;
     private static final String EXTRA_EVENT_ID = "event_id";
+    private static final String EXTRA_USER_ID = "user_id";
     private static final String TAG = "ViewEventActivity";
     private String mEventId;
-    private String mCreator;
+    private String mCreatorId;
+    private String mUserId;
     private EventService mEventService;
     private UserService mUserService;
     private Event mEvent;
     private TextView mEventTitle;
     private TextView mEventDescription;
-    private  TextView mEventCreator;
+    private TextView mEventCreator;
+    private MenuItem mDelete;
+    private MenuItem mEdit;
+    private MenuItem mAttendEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +50,7 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventService = new EventService();
         mUserService = new UserService();
 
+        mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
         getEventInfo();
 
@@ -50,16 +58,18 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventDescription = findViewById(R.id.event_description);
 
         mEventCreator = findViewById(R.id.event_Creator);
-
-
-
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
+                if(!isUserEventCreator()){
+                    Toast.makeText(getApplicationContext(),
+                            "You are not the event creator, cannot delete event", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+
                 // User chose the delete event option, delete the event from the database
                 mEventService.deleteEvent(mEventId, new OnCompleteListener<Void>() {
                     @Override
@@ -67,6 +77,11 @@ public class ViewEventActivity extends AppCompatActivity {
                         if (task.isSuccessful()){
                             // Delete successful, return to map activity
                             Log.d(TAG, "Deleted event " + mEventId);
+                            Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT).show();
+                            Intent deleteData = new Intent();
+                            deleteData.putExtra("event_deleted", true);
+                            deleteData.putExtra("deleted_id", mEventId);
+                            setResult(RESULT_OK, deleteData);
                             finish();
                         } else {
                             // Delete failed, show generic error to user and log real error
@@ -75,23 +90,26 @@ public class ViewEventActivity extends AppCompatActivity {
                     }
                 });
 
-                if(mEvent != null){
-                    Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT).show();
-                    Intent deleteData = new Intent();
-                    deleteData.putExtra("event_deleted", true);
-                    deleteData.putExtra("deleted_id", mEventId);
-                    setResult(RESULT_OK, deleteData);
-                    finish();
-                }
-
                 return true;
             case R.id.action_edit:
+                if(!isUserEventCreator()){
+                    Toast.makeText(getApplicationContext(),
+                            "You are not the event creator, cannot modify event", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+
                 // User chose edit event option, launch the activity to modify the event
                 Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
                         mEvent.getLoc().getLatitude(),
                         mEvent.getLoc().getLongitude(),
-                        mEventId);
+                        mEventId,
+                        mUserId);
                 startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
+                return true;
+
+            case R.id.action_attend:
+                // User chose attend event option, add them as an attendee of the event
+                Toast.makeText(getApplicationContext(), "You are now attending the event", Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
@@ -108,7 +126,24 @@ public class ViewEventActivity extends AppCompatActivity {
 
         // Create the menu from the menu.xml layout file
         getMenuInflater().inflate(R.menu.menu, menu);
+        mDelete = menu.findItem(R.id.action_delete);
+        mEdit = menu.findItem(R.id.action_edit);
+        mAttendEvent = menu.findItem(R.id.action_attend);
+
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu){
+
+        if(!isUserEventCreator()){
+            mDelete.setVisible(false);
+            mEdit.setVisible(false);
+        } else {
+            mAttendEvent.setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -137,7 +172,8 @@ public class ViewEventActivity extends AppCompatActivity {
                         if (document.exists()) {
                             Event event = document.toObject(Event.class);
                             mEvent = event;
-                            mCreator = event.getCreator().getId();
+                            mCreatorId = event.getCreator().getId();
+                            invalidateOptionsMenu();
                             getCreatorInfo();
                             String title = event.getName();
                             String desc = event.getDesc();
@@ -153,16 +189,35 @@ public class ViewEventActivity extends AppCompatActivity {
             });
         } else {
             Log.e(TAG, "No event id provided to getEventInfo()");
-            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
+            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private boolean isUserEventCreator(){
+        if (mCreatorId == null) {
+            Log.e(TAG, "No creator found, cannot check permissions");
+            return false;
+        }
 
+        if (mUserId == null){
+            Log.e(TAG, "No current user found, cannot check permissions");
+            return false;
+        }
 
+        if (!Objects.equals(mCreatorId.trim(), mUserId.trim())) {
+            Log.d(TAG, "Current user: " + mUserId + ", Creator: " + mCreatorId);
+            Log.d(TAG, "Creator id doesn't match user id");
+
+            return false;
+        } else {
+            Log.d(TAG, "Current user is event creator, they can do anything");
+            return true;
+        }
+    }
 
     private void getCreatorInfo(){
-        if(mCreator != null){
-            mUserService.getUser(mCreator, new OnCompleteListener<DocumentSnapshot>() {
+        if(mCreatorId != null){
+            mUserService.getUser(mCreatorId, new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
@@ -179,20 +234,15 @@ public class ViewEventActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.e(TAG, "No event id provided to getEventInfo()");
-            Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT);
+            Log.e(TAG, "No creator id provided to getCreatorInfo()");
+            Toast.makeText(getApplicationContext(), "No event creator found", Toast.LENGTH_SHORT).show();
         }
     }
 
-
-
-
-
-
-
-    public static Intent newIntent(Context packageContext, String eventId){
+    public static Intent newIntent(Context packageContext, String eventId, String userId){
         Intent intent = new Intent(packageContext, ViewEventActivity.class);
         intent.putExtra(EXTRA_EVENT_ID, eventId);
+        intent.putExtra(EXTRA_USER_ID, userId);
         return intent;
     }
 }

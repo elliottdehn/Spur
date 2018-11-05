@@ -33,6 +33,20 @@ public class UserService {
         db.setFirestoreSettings(settings);
     }
 
+    public boolean isValid(User user){
+        if (user.getAuthId() != null && user.getBio() != null && user.getCity() != null
+                && user.getFirst() != null && user.getLast() != null && user.getGender() != null
+                && user.getUsername() != null && user.getAge() > 0.0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public DocumentReference createRefToUser(String userId){
+        return db.collection("users").document(userId);
+    }
+
     public void createUser(User user, String firebaseAuthId){
         OnSuccessListener<DocumentReference> successListener = new OnSuccessListener<DocumentReference>() {
             @Override
@@ -54,11 +68,11 @@ public class UserService {
         data.put("age", user.getAge());
         data.put("bio", user.getBio());
         data.put("city", user.getCity());
-        data.put("first", user.getfName());
-        data.put("last", user.getlName());
+        data.put("first", user.getFirst());
+        data.put("last", user.getLast());
         data.put("gender", user.getGender());
         data.put("username", user.getUsername());
-        data.put("auth_id", firebaseAuthId);
+        data.put("authId", firebaseAuthId);
         db.collection("users")
                 .add(data)
                 .addOnSuccessListener(successListener)
@@ -68,7 +82,7 @@ public class UserService {
     public void getLoggedInUser(OnSuccessListener<QuerySnapshot> successListener, OnFailureListener failureListener){
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String authId = currentUser.getUid();
-        Query loggedInUser = db.collection("users").whereEqualTo("auth_id", authId);
+        Query loggedInUser = db.collection("users").whereEqualTo("authId", authId);
         loggedInUser.get()
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
@@ -82,24 +96,6 @@ public class UserService {
     public void updateUser(String userId, User user){
         db.collection("users").document(userId).set(user);
     }
-
-//    public void updateLoggedInUser(User user){
-//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-//        String authId = currentUser.getUid();
-//        Query loggedInUser = db.collection("users").whereEqualTo("auth_id", authId);
-//        loggedInUser.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//            @Override
-//            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//                DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
-//                doc.
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//
-//            }
-//        });
-//    }
 
     public void deleteUser(String userId, OnCompleteListener<Void> listener){
         db.collection("users").document(userId).delete().addOnCompleteListener(listener);

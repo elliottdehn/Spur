@@ -15,10 +15,12 @@ import android.widget.TimePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.gregory.spur.domain.Event;
 import com.gregory.spur.services.EventService;
+import com.gregory.spur.services.UserService;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -26,7 +28,8 @@ import java.util.Date;
 public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String EXTRA_LONGITUDE = "long";
     public static final String EXTRA_LATITUDE = "lat";
-    public static final String EXTRA_ID = "id";
+    public static final String EXTRA_EVENT_ID = "event_id";
+    public static final String EXTRA_USER_ID = "user_id";
     private static final int REQUEST_CODE_CREATE_EVENT = 0;
     public static final String TAG = "CreateEventActivity";
 
@@ -40,9 +43,11 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
 
     private String mEventId;
+    private String mUserId;
     private double mLatitude;
     private double mLongitude;
     private EventService mEventService = new EventService();
+    private UserService mUserService = new UserService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +66,8 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         Bundle extras = getIntent().getExtras();
 
         // If an event id is provided, we are updating an event
-        mEventId = (String) extras.get(EXTRA_ID);
+        mEventId = (String) extras.get(EXTRA_EVENT_ID);
+        mUserId = (String) extras.get(EXTRA_USER_ID);
         mLatitude = (Double) extras.get(EXTRA_LATITUDE);
         mLongitude = (Double) extras.get(EXTRA_LONGITUDE);
 
@@ -91,9 +97,10 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    public static Intent newIntent(Context packageContext, double lat, double longitude, String eventId){
+    public static Intent newIntent(Context packageContext, double lat, double longitude, String eventId, String userId){
         Intent intent = new Intent(packageContext, CreateEventActivity.class);
-        intent.putExtra(EXTRA_ID, eventId);
+        intent.putExtra(EXTRA_EVENT_ID, eventId);
+        intent.putExtra(EXTRA_USER_ID, userId);
         intent.putExtra(EXTRA_LATITUDE, lat);
         intent.putExtra(EXTRA_LONGITUDE, longitude);
         return intent;
@@ -158,6 +165,8 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         GeoPoint loc = new GeoPoint(mLatitude,mLongitude);
 
         Event event = new Event(eventTitle, description, startTimeStamp, endTimeStamp, loc);
+        DocumentReference creator = mUserService.createRefToUser(mUserId);
+        event.setCreator(creator);
         return event;
     }
 
