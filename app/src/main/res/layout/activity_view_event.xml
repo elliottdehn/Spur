@@ -64,6 +64,22 @@
             android:text="@string/loading"
             android:textSize="20sp" />
 
+        <TextView
+            android:id="@+id/event_attendees_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/event_attendees"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/event_attendees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:enabled="false"
+            android:inputType="textMultiLine"  />
+
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

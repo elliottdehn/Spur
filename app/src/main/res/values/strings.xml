@@ -33,5 +33,6 @@
     <string name="event_desc">Event Description:</string>
     <string name="event_creator">Event creator:</string>
     <string name="loading">Loading...</string>
+    <string name="event_attendees">Event Attendees:</string>
 
 </resources>

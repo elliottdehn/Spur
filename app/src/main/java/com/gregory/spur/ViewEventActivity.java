@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +46,7 @@ public class ViewEventActivity extends AppCompatActivity {
     private TextView mEventTitle;
     private TextView mEventDescription;
     private TextView mEventCreator;
+    private EditText mAttendees;
     private MenuItem mDelete;
     private MenuItem mEdit;
     private MenuItem mAttendEvent;
@@ -66,6 +68,7 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
         mEventCreator = findViewById(R.id.event_Creator);
+        mAttendees = findViewById(R.id.event_attendees);
     }
 
     @Override
@@ -246,10 +249,16 @@ public class ViewEventActivity extends AppCompatActivity {
                         List<DocumentSnapshot> attendeeSnapshots;
                         if (result.size() > 0){
                             attendeeSnapshots = result.getDocuments();
-                            for (DocumentSnapshot snapshot : attendeeSnapshots){
-                                Attendee attendee = snapshot.toObject(Attendee.class);
+                            StringBuilder builder = new StringBuilder();
+                            for (int i = 0; i < attendeeSnapshots.size(); i++){
+                                Attendee attendee = attendeeSnapshots.get(i).toObject(Attendee.class);
                                 Log.d(TAG, "Event " + mEventId + " attendee: " + attendee.getUsername());
+                                builder.append(attendee.getUsername());
+                                if (i != attendeeSnapshots.size() - 1){
+                                    builder.append(", ");
+                                }
                             }
+                            mAttendees.setText(builder.toString());
                         } else {
                             Log.d(TAG, "No attendees for event " + mEventId);
                         }
