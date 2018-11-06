@@ -14,13 +14,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.domain.Attendee;
 import com.gregory.spur.domain.Event;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.EventService;
 import com.gregory.spur.services.UserService;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ViewEventActivity extends AppCompatActivity {
@@ -32,6 +37,7 @@ public class ViewEventActivity extends AppCompatActivity {
     private String mEventId;
     private String mCreatorId;
     private String mUserId;
+    private User mUser;
     private EventService mEventService;
     private UserService mUserService;
     private Event mEvent;
@@ -52,7 +58,9 @@ public class ViewEventActivity extends AppCompatActivity {
 
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+        getEventAttendees();
         getEventInfo();
+        getCurrentUser();
 
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
@@ -110,6 +118,11 @@ public class ViewEventActivity extends AppCompatActivity {
             case R.id.action_attend:
                 // User chose attend event option, add them as an attendee of the event
                 Toast.makeText(getApplicationContext(), "You are now attending the event", Toast.LENGTH_SHORT).show();
+                if (mEventId != null && mUser != null && mUserId != null){
+                    mEventService.addAttendee(mEventId, new Attendee(mUser, mUserId));
+                } else {
+                    Log.e(TAG, "Cannot add attendee, don't have all data yet");
+                }
                 return true;
 
             default:
@@ -162,6 +175,29 @@ public class ViewEventActivity extends AppCompatActivity {
         }
     }
 
+    private void getCurrentUser(){
+        if(mUserId != null){
+            mUserService.getLoggedInUser(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if(queryDocumentSnapshots.size() == 0){
+                        Log.e(TAG, "No logged in user found");
+                    } else {
+                        DocumentSnapshot userSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        mUser = userSnapshot.toObject(User.class);
+                    }
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error getting current user: ", e);
+                }
+            });
+        } else {
+            Log.e(TAG, "No current user id provided");
+        }
+    }
+
     private void getEventInfo(){
         if(mEventId != null){
             mEventService.getEvent(mEventId, new OnCompleteListener<DocumentSnapshot>() {
@@ -173,7 +209,11 @@ public class ViewEventActivity extends AppCompatActivity {
                             Event event = document.toObject(Event.class);
                             mEvent = event;
                             mCreatorId = event.getCreator().getId();
+
+                            // After the creator id has loaded, reload the options menu to reflect
+                            // the correct options
                             invalidateOptionsMenu();
+
                             getCreatorInfo();
                             String title = event.getName();
                             String desc = event.getDesc();
@@ -190,6 +230,33 @@ public class ViewEventActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "No event id provided to getEventInfo()");
             Toast.makeText(getApplicationContext(), "No event found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getEventAttendees(){
+        if(mEventId != null){
+            mEventService.getEventAttendees(mEventId, new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()){
+                        QuerySnapshot result = task.getResult();
+                        List<DocumentSnapshot> attendeeSnapshots;
+                        if (result.size() > 0){
+                            attendeeSnapshots = result.getDocuments();
+                            for (DocumentSnapshot snapshot : attendeeSnapshots){
+                                Attendee attendee = snapshot.toObject(Attendee.class);
+                                Log.d(TAG, "Event " + mEventId + " attendee: " + attendee.getUsername());
+                            }
+                        } else {
+                            Log.d(TAG, "No attendees for event " + mEventId);
+                        }
+                    } else {
+                        Log.e(TAG, "Get event attendees failed: ", task.getException());
+                    }
+                }
+            });
+        } else {
+            Log.e("TAG", "No event id provided to getEventAttendees()");
         }
     }
 
