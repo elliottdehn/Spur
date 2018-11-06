@@ -28,6 +28,19 @@ public class Attendee {
         this.userId = userId;
     }
 
+    public User toUser(){
+        User user = new User();
+        user.setAge(this.age);
+        user.setBio(this.bio);
+        user.setCity(this.city);
+        user.setFirst(this.first);
+        user.setLast(this.last);
+        user.setGender(this.gender);
+        user.setUsername(this.username);
+        user.setAuthId(this.authId);
+        return user;
+    }
+
     public double getAge() {
         return age;
     }

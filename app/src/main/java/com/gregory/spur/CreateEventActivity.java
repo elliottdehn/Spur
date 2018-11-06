@@ -209,7 +209,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Event created, adding creator as initial attendee");
-                        mEventService.addAttendee(documentReference.getId(), new Attendee(mUser, mUserId));
+                        mEventService.addAttendee(documentReference.getId(), mUser, mUserId);
                     }
                 }, new OnFailureListener() {
                     @Override

@@ -22,6 +22,7 @@ import java.util.Map;
 public class EventService {
 
     private FirebaseFirestore db;
+    private UserService userService;
     private static final String TAG = "EventService";
     private static final String EVENTS = "events";
     private static final String ATTENDEES = "attendees";
@@ -33,6 +34,7 @@ public class EventService {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
+        userService = new UserService();
     }
 
     public void createEvent(Event event) {
@@ -51,17 +53,31 @@ public class EventService {
         createEvent(event, successListener, failureListener);
     }
 
-    public void addAttendee(final String eventId, final Attendee attendee){
-        db.collection(EVENTS).document(eventId).collection(ATTENDEES).add(attendee).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+    public void addAttendee(final String eventId, final User user, String userId){
+        addAttendee(eventId, user, userId, new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 if(task.isSuccessful()){
-                    Log.d(TAG, "Added attendee " + attendee.getUsername() + " to event " + eventId);
+                    Log.d(TAG, "Added attendee " + user.getUsername() + " to event " + eventId);
                 } else {
                     Log.e(TAG, "Failed to add attendee: ", task.getException());
                 }
             }
         });
+    }
+
+    public void addAttendee(final String eventId, final User user, String userId, OnCompleteListener<DocumentReference> listener) throws IllegalArgumentException{
+        // Before adding the attendee, make sure they aren't already attending the event
+        if (user.getAttendingEvents().contains(eventId)){
+            throw new IllegalArgumentException("User is already attending this event");
+        }
+
+        // Update the user model with the new event they're attending
+        userService.addAttendingEvent(user, userId, eventId);
+
+        // Update the event with the new attendee
+        Attendee attendee = new Attendee(user, userId);
+        db.collection(EVENTS).document(eventId).collection(ATTENDEES).add(attendee).addOnCompleteListener(listener);
     }
 
     public void createEvent(Event event, OnSuccessListener<DocumentReference> successListener, OnFailureListener failureListener){

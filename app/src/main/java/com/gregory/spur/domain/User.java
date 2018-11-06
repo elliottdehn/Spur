@@ -1,5 +1,8 @@
 package com.gregory.spur.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
 
     private double age;
@@ -10,6 +13,7 @@ public class User {
     private String gender;
     private String username;
     private String authId;
+    private List<String> attendingEvents = new ArrayList<>();
 
     public User(){
 
@@ -77,5 +81,17 @@ public class User {
 
     public void setAuthId(String authId) {
         this.authId = authId;
+    }
+
+    public List<String> getAttendingEvents() {
+        return attendingEvents;
+    }
+
+    public void setAttendingEvents(List<String> attendingEvents) {
+        this.attendingEvents = attendingEvents;
+    }
+
+    public void addAttendingEvent(String eventId){
+        this.attendingEvents.add(eventId);
     }
 }
