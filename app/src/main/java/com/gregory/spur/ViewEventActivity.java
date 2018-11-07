@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -68,6 +69,19 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
         mEventCreator = findViewById(R.id.event_Creator);
+        mEventCreator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCreatorId != null){
+                    Intent intent = ProfileView.newIntent(getApplicationContext(), mCreatorId);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Creator info hasn't loaded yet, can't view profile", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Creator info hasn't loaded yet, can't view profile");
+                }
+
+            }
+        });
         mAttendees = findViewById(R.id.event_attendees);
     }
 
