@@ -28,7 +28,7 @@ public class Event {
     }
 
     //use this constructor for connectivity demonstration
-    public Event(String title, String desc, Timestamp start, Timestamp end, GeoPoint loc){
+    public Event(String title, String desc, Timestamp start, Timestamp end, GeoPoint loc) {
         this.name = title;
         this.desc = desc;
         this.start = start;
@@ -36,7 +36,9 @@ public class Event {
         this.loc = loc;
         this.romantic = false;
         this.min = NO_MIN;
-        this.max = NO_MAX; }
+        this.max = NO_MAX;
+        this.vis = "ALL";
+    }
 
     //use this constructor once users are set up
     public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc){
