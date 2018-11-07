@@ -12,6 +12,10 @@ public class Review {
     private String description;
     private Timestamp written;
 
+    public Review(){
+
+    }
+
     public Review(String author, String target, boolean like, String description, Timestamp written) {
         this.author = author;
         this.target = target;

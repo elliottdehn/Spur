@@ -14,10 +14,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.domain.Review;
 import com.gregory.spur.domain.User;
+import com.gregory.spur.services.ReviewService;
 import com.gregory.spur.services.UserService;
+
+import java.util.List;
 
 public class ProfileView extends AppCompatActivity {
 
@@ -25,6 +30,7 @@ public class ProfileView extends AppCompatActivity {
     private static final String TAG = "ProfileView";
 
     private UserService mUserService = new UserService();
+    private ReviewService mReviewService = new ReviewService();
     private String mUserId;
     private User mUser;
     private TextView mUsernameText;
@@ -67,6 +73,33 @@ public class ProfileView extends AppCompatActivity {
         mBioText.setText(mUser.getBio());
     }
 
+    private void getReviewsForUser(){
+        if(mUserId != null){
+            DocumentReference userRef = mUserService.createRefToUser(mUserId);
+            String path = userRef.getPath();
+            mReviewService.getReviewsAbout(path, new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()){
+                        QuerySnapshot result = task.getResult();
+                        List<Review> reviews = result.toObjects(Review.class);
+                        if(reviews.size() == 0){
+                            Log.d(TAG, "No reviews for user " + mUser.getUsername());
+                        } else {
+                            for (Review review : reviews){
+                                Log.d(TAG, "Review for " + mUser.getUsername() + " " + review.getDescription());
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Get reviews for user failed", task.getException());
+                    }
+                }
+            });
+        } else {
+            Log.e(TAG, "No user id provided to getReviewsForUser()");
+        }
+    }
+
     private void getUserInfo(){
         if(mUserId != null){
             mUserService.getUser(mUserId, new OnCompleteListener<DocumentSnapshot>() {
@@ -75,6 +108,7 @@ public class ProfileView extends AppCompatActivity {
                     if (task.isSuccessful()){
                         DocumentSnapshot userSnapshot = task.getResult();
                         mUser = userSnapshot.toObject(User.class);
+                        getReviewsForUser();
                         updateUIWithUser();
                     } else {
                         Log.e(TAG, "Getting user info failed: ", task.getException());
@@ -82,7 +116,7 @@ public class ProfileView extends AppCompatActivity {
                 }
             });
         } else {
-            Log.e(TAG, "No current user id provided");
+            Log.e(TAG, "No user id provided to getUserInfo()");
         }
     }
 }
