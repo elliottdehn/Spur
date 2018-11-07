@@ -6,13 +6,13 @@ import com.google.firebase.firestore.DocumentReference;
 import java.util.Date;
 
 public class Review {
-    private DocumentReference author;
-    private DocumentReference target;
+    private String author;
+    private String target;
     private boolean like;
     private String description;
     private Timestamp written;
 
-    public Review(DocumentReference author, DocumentReference target, boolean like, String description, Timestamp written) {
+    public Review(String author, String target, boolean like, String description, Timestamp written) {
         this.author = author;
         this.target = target;
         this.like = like;
@@ -20,19 +20,19 @@ public class Review {
         this.written = written;
     }
 
-    public DocumentReference getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(DocumentReference author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
-    public DocumentReference getTarget() {
+    public String getTarget() {
         return target;
     }
 
-    public void setTarget(DocumentReference target) {
+    public void setTarget(String target) {
         this.target = target;
     }
 
