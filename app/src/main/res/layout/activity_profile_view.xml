@@ -100,15 +100,13 @@
             android:text="Bio:"
             android:textSize="20sp" />
 
-        <EditText
+        <TextView
             android:id="@+id/bio_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:lines="5"
-            android:inputType="textMultiLine"
-            android:enabled="false"
-            tools:text="This is my bio" />
+            android:text="@string/loading"
+            android:textAlignment="center"
+            android:textSize="18sp" />
 
         <ScrollView
             android:layout_width="match_parent"

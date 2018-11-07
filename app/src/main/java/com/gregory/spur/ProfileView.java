@@ -31,7 +31,7 @@ public class ProfileView extends AppCompatActivity {
     private TextView mFullNameText;
     private TextView mAgeText;
     private TextView mGenderText;
-    private EditText mBioText;
+    private TextView mBioText;
     private Button mAddReviewButton;
 
 

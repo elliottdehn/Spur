@@ -3,6 +3,7 @@ package com.gregory.spur;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -69,6 +70,7 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
         mEventCreator = findViewById(R.id.event_Creator);
+        mEventCreator.setPaintFlags(mEventCreator.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
         mEventCreator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
