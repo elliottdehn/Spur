@@ -29,19 +29,18 @@ public class ReviewAdapter extends ArrayAdapter<Review> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mCtx
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView;
-        if(convertView != null) {
+        View rowView = convertView;
+
+        if(rowView == null) {
             rowView = inflater.inflate(R.layout.content_review_layout, parent, false);
-        } else {
-            return convertView;
+            TextView likeView = (TextView) rowView.findViewById(R.id.TextViewLikeDislike);
+            TextView descriptionView = (TextView) rowView.findViewById(R.id.TextViewReviewDescription);
+            Review r = reviews.get(position);
+            if(!r.isLike()){
+                likeView.setText("👎");
+            }
+            descriptionView.setText(r.getDescription());
         }
-        TextView likeView = (TextView) rowView.findViewById(R.id.TextViewLikeDislike);
-        TextView descriptionView = (TextView) rowView.findViewById(R.id.TextViewDescription);
-        Review r = reviews.get(position);
-        if(!r.isLike()){
-            likeView.setText("👎");
-        }
-        descriptionView.setText(r.getDescription());
 
         return rowView;
     }

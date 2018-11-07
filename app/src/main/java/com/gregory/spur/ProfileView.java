@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.domain.Review;
+import com.gregory.spur.domain.ReviewAdapter;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.ReviewService;
 import com.gregory.spur.services.UserService;
@@ -39,6 +41,7 @@ public class ProfileView extends AppCompatActivity {
     private TextView mGenderText;
     private TextView mBioText;
     private Button mAddReviewButton;
+    private ListView mReviewsList;
 
 
     @Override
@@ -55,6 +58,7 @@ public class ProfileView extends AppCompatActivity {
         mGenderText = findViewById(R.id.gender_text);
         mBioText = findViewById(R.id.bio_text);
         mAddReviewButton = findViewById(R.id.add_review_button);
+        mReviewsList = findViewById(R.id.reviews_list);
     }
 
     public static Intent newIntent(Context context, String userId){
@@ -86,9 +90,8 @@ public class ProfileView extends AppCompatActivity {
                         if(reviews.size() == 0){
                             Log.d(TAG, "No reviews for user " + mUser.getUsername());
                         } else {
-                            for (Review review : reviews){
-                                Log.d(TAG, "Review for " + mUser.getUsername() + " " + review.getDescription());
-                            }
+                            ReviewAdapter adapter = new ReviewAdapter(getApplicationContext(), R.layout.content_review_layout, reviews);
+                            mReviewsList.setAdapter(adapter);
                         }
                     } else {
                         Log.e(TAG, "Get reviews for user failed", task.getException());
