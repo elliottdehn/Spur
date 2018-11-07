@@ -12,6 +12,7 @@
         android:textSize="40sp"
         android:text="👍"/>
     <TextView
+        android:id="@+id/TextViewReviewDescription"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:inputType="textMultiLine"
