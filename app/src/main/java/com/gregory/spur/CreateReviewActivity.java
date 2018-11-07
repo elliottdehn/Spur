@@ -1,5 +1,6 @@
 package com.gregory.spur;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -12,13 +13,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.R;
+import com.gregory.spur.domain.Review;
+import com.gregory.spur.services.ReviewService;
 import com.gregory.spur.services.UserService;
 
-public class CreateReviewActivity extends AppCompatActivity implements View.OnClickListener, OnSuccessListener<QuerySnapshot>, OnFailureListener {
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+
+public class CreateReviewActivity extends AppCompatActivity implements View.OnClickListener, OnSuccessListener<QuerySnapshot>, OnFailureListener, OnCompleteListener {
 
     public static final String TARGET = "TARGET";
     private String target;
@@ -49,6 +59,16 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
                 String comment = description.getText().toString();
                 Boolean liked = ((Switch) findViewById(R.id.SwitchLike)).isChecked();
                 //create and send review to database
+
+                Date now = new Date();
+                Timestamp ts = new Timestamp(now);
+                Review review = new Review(owner, target, liked, comment, ts);
+                ReviewService rs = new ReviewService();
+                rs.createReview(review, this);
+
+                //laucnh the map
+                Intent intent = MapsActivity.newIntent(getApplicationContext(), owner);
+                startActivity(intent);
                 break;
         }
     }
@@ -62,5 +82,14 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
         owner = queryDocumentSnapshots.getDocuments().get(0).getId();
         mButton.setEnabled(true);
+    }
+
+    @Override
+    public void onComplete(@NonNull Task task) {
+        if(task.isSuccessful()) {
+            //launch the map
+            Intent intent = MapsActivity.newIntent(getApplicationContext(), owner);
+            startActivity(intent);
+        }
     }
 }
