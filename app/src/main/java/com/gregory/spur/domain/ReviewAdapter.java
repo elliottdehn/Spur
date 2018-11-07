@@ -36,7 +36,7 @@ public class ReviewAdapter extends ArrayAdapter<Review> {
             TextView likeView = (TextView) rowView.findViewById(R.id.TextViewLikeDislike);
             TextView descriptionView = (TextView) rowView.findViewById(R.id.TextViewReviewDescription);
             Review r = reviews.get(position);
-            if (!r.isLike()) {
+            if(!r.isLike()){
                 likeView.setText("👎");
             }
             descriptionView.setText(r.getDescription());
