@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -26,7 +27,7 @@ import com.gregory.spur.services.UserService;
 
 import java.util.List;
 
-public class ProfileView extends AppCompatActivity {
+public class ProfileView extends AppCompatActivity implements View.OnClickListener {
 
     private static final String EXTRA_USER_ID = "user_id";
     private static final String TAG = "ProfileView";
@@ -58,7 +59,18 @@ public class ProfileView extends AppCompatActivity {
         mGenderText = findViewById(R.id.gender_text);
         mBioText = findViewById(R.id.bio_text);
         mAddReviewButton = findViewById(R.id.add_review_button);
+        mAddReviewButton.setOnClickListener(this);
         mReviewsList = findViewById(R.id.reviews_list);
+    }
+
+    @Override
+    public void onClick(View v){
+        if(v.getId() == mAddReviewButton.getId()){
+            String userPath = mUserService.createRefToUser(mUserId).getPath();
+
+            Intent intent = CreateReviewActivity.newIntent(getApplicationContext(), userPath);
+            startActivity(intent);
+        }
     }
 
     public static Intent newIntent(Context context, String userId){

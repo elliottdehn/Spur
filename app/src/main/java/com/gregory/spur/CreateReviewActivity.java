@@ -1,5 +1,6 @@
 package com.gregory.spur;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,6 +32,7 @@ import java.util.Date;
 public class CreateReviewActivity extends AppCompatActivity implements View.OnClickListener, OnSuccessListener<QuerySnapshot>, OnFailureListener, OnCompleteListener {
 
     public static final String TARGET = "TARGET";
+    private UserService mUserService = new UserService();
     private String target;
     private String owner;
     private Button mButton;
@@ -38,24 +40,22 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_review);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setContentView(R.layout.content_create_review);
 
-        Button mButton = findViewById(R.id.ButtonSubmitReview);
+        mButton = findViewById(R.id.ButtonSubmitReview);
         mButton.setOnClickListener(this);
         mButton.setEnabled(false);
         UserService us = new UserService();
         us.getLoggedInUser(this, this);
 
-        target = savedInstanceState.getString(TARGET);
+        target = getIntent().getStringExtra(TARGET);
     }
 
     @Override
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.ButtonSubmitReview:
-                EditText description = findViewById(R.id.EditTextDescription);
+                EditText description = findViewById(R.id.EditTextReviewDescription);
                 String comment = description.getText().toString();
                 Boolean liked = ((Switch) findViewById(R.id.SwitchLike)).isChecked();
                 //create and send review to database
@@ -73,6 +73,12 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
+    public static Intent newIntent(Context context, String targetUserPath){
+        Intent intent = new Intent(context, CreateReviewActivity.class);
+        intent.putExtra(TARGET, targetUserPath);
+        return intent;
+    }
+
     @Override
     public void onFailure(@NonNull Exception e) {
         Log.d("Error", "Failed to fetch logged in user");
@@ -81,6 +87,7 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
         owner = queryDocumentSnapshots.getDocuments().get(0).getId();
+        owner = mUserService.createRefToUser(owner).getPath();
         mButton.setEnabled(true);
     }
 

@@ -16,13 +16,7 @@ public class ReviewService {
     }
 
     public void createReview(Review review, OnCompleteListener listener){
-        Map<String, Object> docData = new HashMap<>();
-        docData.put("author", review.getAuthor());
-        docData.put("like", review.isLike());
-        docData.put("target", review.getTarget());
-        docData.put("desc", review.getDescription());
-        docData.put("written", review.getWritten());
-        db.collection("reviews").add(docData).addOnCompleteListener(listener);
+        db.collection("reviews").add(review).addOnCompleteListener(listener);
     }
 
     public void getReviewsAbout(String userPath, OnCompleteListener<QuerySnapshot> listener){
