@@ -1,9 +1,6 @@
 package com.gregory.spur.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class User {
+public class Attendee {
 
     private double age;
     private String bio;
@@ -13,10 +10,35 @@ public class User {
     private String gender;
     private String username;
     private String authId;
-    private List<String> attendingEvents = new ArrayList<>();
+    private String userId;
 
-    public User(){
+    public Attendee(){
 
+    }
+
+    public Attendee(User user, String userId){
+        this.age = user.getAge();
+        this.bio = user.getBio();
+        this.city = user.getCity();
+        this.first = user.getFirst();
+        this.last = user.getLast();
+        this.gender = user.getGender();
+        this.username = user.getUsername();
+        this.authId = user.getAuthId();
+        this.userId = userId;
+    }
+
+    public User toUser(){
+        User user = new User();
+        user.setAge(this.age);
+        user.setBio(this.bio);
+        user.setCity(this.city);
+        user.setFirst(this.first);
+        user.setLast(this.last);
+        user.setGender(this.gender);
+        user.setUsername(this.username);
+        user.setAuthId(this.authId);
+        return user;
     }
 
     public double getAge() {
@@ -83,15 +105,11 @@ public class User {
         this.authId = authId;
     }
 
-    public List<String> getAttendingEvents() {
-        return attendingEvents;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setAttendingEvents(List<String> attendingEvents) {
-        this.attendingEvents = attendingEvents;
-    }
-
-    public void addAttendingEvent(String eventId){
-        this.attendingEvents.add(eventId);
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

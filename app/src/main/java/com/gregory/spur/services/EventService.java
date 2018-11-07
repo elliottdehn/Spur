@@ -6,12 +6,15 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.domain.Attendee;
 import com.gregory.spur.domain.Event;
+import com.gregory.spur.domain.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +22,10 @@ import java.util.Map;
 public class EventService {
 
     private FirebaseFirestore db;
+    private UserService userService;
     private static final String TAG = "EventService";
+    private static final String EVENTS = "events";
+    private static final String ATTENDEES = "attendees";
 
     public EventService(){
         FirebaseFirestore.setLoggingEnabled(true);
@@ -28,6 +34,7 @@ public class EventService {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
+        userService = new UserService();
     }
 
     public void createEvent(Event event) {
@@ -46,6 +53,33 @@ public class EventService {
         createEvent(event, successListener, failureListener);
     }
 
+    public void addAttendee(final String eventId, final User user, String userId){
+        addAttendee(eventId, user, userId, new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                if(task.isSuccessful()){
+                    Log.d(TAG, "Added attendee " + user.getUsername() + " to event " + eventId);
+                } else {
+                    Log.e(TAG, "Failed to add attendee: ", task.getException());
+                }
+            }
+        });
+    }
+
+    public void addAttendee(final String eventId, final User user, String userId, OnCompleteListener<DocumentReference> listener) throws IllegalArgumentException{
+        // Before adding the attendee, make sure they aren't already attending the event
+        if (user.getAttendingEvents().contains(eventId)){
+            throw new IllegalArgumentException("User is already attending this event");
+        }
+
+        // Update the user model with the new event they're attending
+        userService.addAttendingEvent(user, userId, eventId);
+
+        // Update the event with the new attendee
+        Attendee attendee = new Attendee(user, userId);
+        db.collection(EVENTS).document(eventId).collection(ATTENDEES).add(attendee).addOnCompleteListener(listener);
+    }
+
     public void createEvent(Event event, OnSuccessListener<DocumentReference> successListener, OnFailureListener failureListener){
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", event.getName());
@@ -58,23 +92,27 @@ public class EventService {
         docData.put("vis", event.getVis());
         docData.put("start", event.getStart());
         docData.put("end", event.getEnd());
-        docData.put("attendees",event.getAttendees());
-        db.collection("events")
+        db.collection(EVENTS)
                 .add(docData)
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
     }
 
     public void updateEvent(String eventId, Event event) {
-        db.collection("events").document(eventId).set(event);
+        db.collection(EVENTS).document(eventId).set(event);
     }
 
     public void getEvent(String eventId, OnCompleteListener<DocumentSnapshot> listener) {
-        db.collection("events").document(eventId).get().addOnCompleteListener(listener);
+        db.collection(EVENTS).document(eventId).get().addOnCompleteListener(listener);
+    }
+
+    public void getEventAttendees(String eventId, OnCompleteListener<QuerySnapshot> listener){
+        db.collection(EVENTS).document(eventId)
+                .collection(ATTENDEES).get().addOnCompleteListener(listener);
     }
 
     public void deleteEvent(String eventId, OnCompleteListener<Void> listener) {
-        db.collection("events").document(eventId).delete().addOnCompleteListener(listener);
+        db.collection(EVENTS).document(eventId).delete().addOnCompleteListener(listener);
     }
 
 
@@ -83,7 +121,7 @@ public class EventService {
     }
 
     public void getEvents(OnCompleteListener<QuerySnapshot> listener) {
-        db.collection("events").get().addOnCompleteListener(listener);
+        db.collection(EVENTS).get().addOnCompleteListener(listener);
     }
 
 }

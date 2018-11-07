@@ -10,17 +10,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.domain.Attendee;
 import com.gregory.spur.domain.Event;
 import com.gregory.spur.domain.User;
 import com.gregory.spur.services.EventService;
 import com.gregory.spur.services.UserService;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ViewEventActivity extends AppCompatActivity {
@@ -32,12 +39,14 @@ public class ViewEventActivity extends AppCompatActivity {
     private String mEventId;
     private String mCreatorId;
     private String mUserId;
-    private EventService mEventService;
-    private UserService mUserService;
+    private User mUser;
+    private EventService mEventService = new EventService();
+    private UserService mUserService = new UserService();
     private Event mEvent;
     private TextView mEventTitle;
     private TextView mEventDescription;
     private TextView mEventCreator;
+    private EditText mAttendees;
     private MenuItem mDelete;
     private MenuItem mEdit;
     private MenuItem mAttendEvent;
@@ -47,29 +56,25 @@ public class ViewEventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_event);
 
-        mEventService = new EventService();
-        mUserService = new UserService();
-
+        // get passed in data
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+
+        // query for all necessary data from database
+        getEventAttendees();
         getEventInfo();
+        getCurrentUser();
 
         mEventTitle = findViewById(R.id.event_title);
         mEventDescription = findViewById(R.id.event_description);
-
         mEventCreator = findViewById(R.id.event_Creator);
+        mAttendees = findViewById(R.id.event_attendees);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
-                if(!isUserEventCreator()){
-                    Toast.makeText(getApplicationContext(),
-                            "You are not the event creator, cannot delete event", Toast.LENGTH_LONG).show();
-                    return true;
-                }
-
                 // User chose the delete event option, delete the event from the database
                 mEventService.deleteEvent(mEventId, new OnCompleteListener<Void>() {
                     @Override
@@ -84,20 +89,15 @@ public class ViewEventActivity extends AppCompatActivity {
                             setResult(RESULT_OK, deleteData);
                             finish();
                         } else {
-                            // Delete failed, show generic error to user and log real error
+                            // Delete failed, show error to user and log stack trace
                             Log.e(TAG, "Failed to delete event: ", task.getException());
+                            Toast.makeText(getApplicationContext(),
+                                    "Failed to delete event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-
                 return true;
             case R.id.action_edit:
-                if(!isUserEventCreator()){
-                    Toast.makeText(getApplicationContext(),
-                            "You are not the event creator, cannot modify event", Toast.LENGTH_LONG).show();
-                    return true;
-                }
-
                 // User chose edit event option, launch the activity to modify the event
                 Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
                         mEvent.getLoc().getLatitude(),
@@ -109,7 +109,26 @@ public class ViewEventActivity extends AppCompatActivity {
 
             case R.id.action_attend:
                 // User chose attend event option, add them as an attendee of the event
-                Toast.makeText(getApplicationContext(), "You are now attending the event", Toast.LENGTH_SHORT).show();
+                if (mEventId != null && mUser != null && mUserId != null){
+                    try {
+                        mEventService.addAttendee(mEventId, mUser, mUserId, new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if (task.isSuccessful()){
+                                    Toast.makeText(getApplicationContext(), "You are now attending the event!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Log.e(TAG, "Failed to add user " + mUserId + " to event " + mEventId + ": ", task.getException());
+                                    Toast.makeText(getApplicationContext(), "Failed to add you to the event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } catch (IllegalArgumentException e){
+                        Toast.makeText(getApplicationContext(), "You are already attending this event", Toast.LENGTH_SHORT).show();
+                    }
+
+                } else {
+                    Log.d(TAG, "Cannot add attendee, don't have all data yet");
+                }
                 return true;
 
             default:
@@ -162,6 +181,29 @@ public class ViewEventActivity extends AppCompatActivity {
         }
     }
 
+    private void getCurrentUser(){
+        if(mUserId != null){
+            mUserService.getLoggedInUser(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if(queryDocumentSnapshots.size() == 0){
+                        Log.e(TAG, "No logged in user found");
+                    } else {
+                        DocumentSnapshot userSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        mUser = userSnapshot.toObject(User.class);
+                    }
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error getting current user: ", e);
+                }
+            });
+        } else {
+            Log.e(TAG, "No current user id provided");
+        }
+    }
+
     private void getEventInfo(){
         if(mEventId != null){
             mEventService.getEvent(mEventId, new OnCompleteListener<DocumentSnapshot>() {
@@ -173,7 +215,11 @@ public class ViewEventActivity extends AppCompatActivity {
                             Event event = document.toObject(Event.class);
                             mEvent = event;
                             mCreatorId = event.getCreator().getId();
+
+                            // After the creator id has loaded, reload the options menu to reflect
+                            // the available options for the current user
                             invalidateOptionsMenu();
+
                             getCreatorInfo();
                             String title = event.getName();
                             String desc = event.getDesc();
@@ -193,14 +239,47 @@ public class ViewEventActivity extends AppCompatActivity {
         }
     }
 
+    private void getEventAttendees(){
+        if(mEventId != null){
+            mEventService.getEventAttendees(mEventId, new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()){
+                        QuerySnapshot result = task.getResult();
+                        List<DocumentSnapshot> attendeeSnapshots;
+                        if (result.size() > 0){
+                            attendeeSnapshots = result.getDocuments();
+                            StringBuilder builder = new StringBuilder();
+                            for (int i = 0; i < attendeeSnapshots.size(); i++){
+                                Attendee attendee = attendeeSnapshots.get(i).toObject(Attendee.class);
+                                Log.d(TAG, "Event " + mEventId + " attendee: " + attendee.getUsername());
+                                builder.append(attendee.getUsername());
+                                if (i != attendeeSnapshots.size() - 1){
+                                    builder.append(", ");
+                                }
+                            }
+                            mAttendees.setText(builder.toString());
+                        } else {
+                            Log.d(TAG, "No attendees for event " + mEventId);
+                        }
+                    } else {
+                        Log.e(TAG, "Get event attendees failed: ", task.getException());
+                    }
+                }
+            });
+        } else {
+            Log.e("TAG", "No event id provided to getEventAttendees()");
+        }
+    }
+
     private boolean isUserEventCreator(){
         if (mCreatorId == null) {
-            Log.e(TAG, "No creator found, cannot check permissions");
+            Log.d(TAG, "No creator found, cannot check permissions");
             return false;
         }
 
         if (mUserId == null){
-            Log.e(TAG, "No current user found, cannot check permissions");
+            Log.d(TAG, "No current user found, cannot check permissions");
             return false;
         }
 

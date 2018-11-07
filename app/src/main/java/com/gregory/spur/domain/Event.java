@@ -23,7 +23,6 @@ public class Event {
     private double min;
     private double max;
     private String vis;
-    private List<DocumentReference> attendees;
 
     public Event() {
     }
@@ -52,7 +51,7 @@ public class Event {
         this.romantic = false;
         this.min = NO_MIN;
         this.max = NO_MAX;
-        this.attendees = new ArrayList<DocumentReference>(); }
+    }
 
     public Event(DocumentReference creator, String title, String desc, Timestamp start, Timestamp end, GeoPoint loc, boolean romantic, double min, double max, String vis, List<DocumentReference> attendees) {
         this.creator = creator;
@@ -65,7 +64,6 @@ public class Event {
         this.min = min;
         this.max = max;
         this.vis = vis;
-        this.attendees = attendees;
     }
 
     public DocumentReference getCreator() {
@@ -146,13 +144,5 @@ public class Event {
 
     public void setVis(String vis) {
         this.vis = vis;
-    }
-
-    public List<DocumentReference> getAttendees() {
-        return attendees;
-    }
-
-    public void setAttendees(List<DocumentReference> attendees) {
-        this.attendees = attendees;
     }
 }

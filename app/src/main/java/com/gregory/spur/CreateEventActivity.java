@@ -13,12 +13,17 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.gregory.spur.domain.Attendee;
 import com.gregory.spur.domain.Event;
+import com.gregory.spur.domain.User;
 import com.gregory.spur.services.EventService;
 import com.gregory.spur.services.UserService;
 
@@ -44,6 +49,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
     private String mEventId;
     private String mUserId;
+    private User mUser;
     private double mLatitude;
     private double mLongitude;
     private EventService mEventService = new EventService();
@@ -68,6 +74,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         // If an event id is provided, we are updating an event
         mEventId = (String) extras.get(EXTRA_EVENT_ID);
         mUserId = (String) extras.get(EXTRA_USER_ID);
+        getCurrentUser();
         mLatitude = (Double) extras.get(EXTRA_LATITUDE);
         mLongitude = (Double) extras.get(EXTRA_LONGITUDE);
 
@@ -149,6 +156,29 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         mEndTime.setMinute(endDate.getMinutes());
     }
 
+    private void getCurrentUser(){
+        if(mUserId != null){
+            mUserService.getLoggedInUser(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if(queryDocumentSnapshots.size() == 0){
+                        Log.e(TAG, "No logged in user found");
+                    } else {
+                        DocumentSnapshot userSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        mUser = userSnapshot.toObject(User.class);
+                    }
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error getting current user: ", e);
+                }
+            });
+        } else {
+            Log.e(TAG, "No current user id provided");
+        }
+    }
+
     private Event readEventFromUI(){
         String eventTitle = mTitle.getText().toString();
         String description = mDescription.getText().toString();
@@ -175,7 +205,18 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         switch(v.getId()){
             case R.id.ButtonCreate:
                 Event newEvent = readEventFromUI();
-                mEventService.createEvent(newEvent);
+                mEventService.createEvent(newEvent, new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "Event created, adding creator as initial attendee");
+                        mEventService.addAttendee(documentReference.getId(), mUser, mUserId);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Failed to create event: ", e);
+                    }
+                });
                 Intent creationData = new Intent();
                 creationData.putExtra("event_created", true);
                 setResult(RESULT_OK, creationData);
