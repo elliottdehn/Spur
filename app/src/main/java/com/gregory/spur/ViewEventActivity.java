@@ -131,6 +131,8 @@ public class ViewEventActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<DocumentReference> task) {
                                 if (task.isSuccessful()){
+                                    // Refresh the list of event attendees
+                                    getEventAttendees();
                                     Toast.makeText(getApplicationContext(), "You are now attending the event!", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.e(TAG, "Failed to add user " + mUserId + " to event " + mEventId + ": ", task.getException());
