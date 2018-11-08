@@ -55,9 +55,7 @@
             android:noHistory="true" />
         <activity android:name=".ProfileView" />
         <activity
-            android:name=".CreateReviewActivity"
-            android:label="@string/title_activity_create_review"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:name=".CreateReviewActivity"></activity>
     </application>
 
 </manifest>
