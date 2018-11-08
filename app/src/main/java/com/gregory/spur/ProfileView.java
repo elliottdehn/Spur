@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,12 +26,14 @@ import com.gregory.spur.domain.User;
 import com.gregory.spur.services.ReviewService;
 import com.gregory.spur.services.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileView extends AppCompatActivity implements View.OnClickListener {
 
     private static final String EXTRA_USER_ID = "user_id";
     private static final String TAG = "ProfileView";
+    private static final int REQUEST_ADD_REVIEW = 1;
 
     private UserService mUserService = new UserService();
     private ReviewService mReviewService = new ReviewService();
@@ -43,6 +46,7 @@ public class ProfileView extends AppCompatActivity implements View.OnClickListen
     private TextView mBioText;
     private Button mAddReviewButton;
     private ListView mReviewsList;
+    private ReviewAdapter mAdapter;
 
 
     @Override
@@ -69,7 +73,17 @@ public class ProfileView extends AppCompatActivity implements View.OnClickListen
             String userPath = mUserService.createRefToUser(mUserId).getPath();
 
             Intent intent = CreateReviewActivity.newIntent(getApplicationContext(), userPath);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_ADD_REVIEW);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ADD_REVIEW){
+            if(resultCode == RESULT_OK){
+                // User successfully reviewed the profile being viewed, update the reviews list
+                getReviewsForUser();
+            }
         }
     }
 
@@ -98,12 +112,17 @@ public class ProfileView extends AppCompatActivity implements View.OnClickListen
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     if (task.isSuccessful()){
                         QuerySnapshot result = task.getResult();
-                        List<Review> reviews = result.toObjects(Review.class);
-                        if(reviews.size() == 0){
+                        List<Review> newReviews = result.toObjects(Review.class);
+                        if(newReviews.size() == 0){
                             Log.d(TAG, "No reviews for user " + mUser.getUsername());
                         } else {
-                            ReviewAdapter adapter = new ReviewAdapter(getApplicationContext(), R.layout.content_review_layout, reviews);
-                            mReviewsList.setAdapter(adapter);
+                            if(mAdapter == null){
+                                mAdapter = new ReviewAdapter(getApplicationContext(), R.layout.content_review_layout, newReviews);
+                                mReviewsList.setAdapter(mAdapter);
+                            } else {
+                                mAdapter.clear();
+                                mAdapter.addAll(newReviews);
+                            }
                         }
                     } else {
                         Log.e(TAG, "Get reviews for user failed", task.getException());

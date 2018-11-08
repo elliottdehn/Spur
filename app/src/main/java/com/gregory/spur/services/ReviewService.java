@@ -2,6 +2,7 @@ package com.gregory.spur.services;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gregory.spur.domain.Review;
 
@@ -20,7 +21,7 @@ public class ReviewService {
     }
 
     public void getReviewsAbout(String userPath, OnCompleteListener<QuerySnapshot> listener){
-        db.collection("reviews").whereEqualTo("target", userPath).get().addOnCompleteListener(listener);
+        db.collection("reviews").whereEqualTo("target", userPath).orderBy("written", Query.Direction.DESCENDING).get().addOnCompleteListener(listener);
     }
 
     public void getReviewsBy(String userPath, OnCompleteListener<QuerySnapshot> listener){

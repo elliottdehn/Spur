@@ -101,11 +101,22 @@
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/bio_label" />
 
+    <TextView
+        android:id="@+id/reviews_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reviews:"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/bio_text"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
     <ListView
         android:id="@+id/reviews_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/bio_text" />
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/reviews_label"
+        tools:layout_editor_absoluteX="10dp" />
 
     <Button
         android:id="@+id/add_review_button"

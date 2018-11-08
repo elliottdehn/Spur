@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Review {
     private String author;
@@ -22,6 +23,28 @@ public class Review {
         this.like = like;
         this.description = description;
         this.written = written;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o){
+            return true;
+        }
+
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        Review review = (Review) o;
+        return Objects.equals(author, review.getAuthor())
+                && Objects.equals(target, review.getTarget())
+                && Objects.equals(like, review.isLike())
+                && Objects.equals(description, review.getDescription())
+                && Objects.equals(written, review.getWritten());
     }
 
     public String getAuthor() {

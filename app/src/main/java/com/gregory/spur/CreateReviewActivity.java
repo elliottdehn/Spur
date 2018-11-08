@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,7 +32,8 @@ import java.util.Date;
 
 public class CreateReviewActivity extends AppCompatActivity implements View.OnClickListener, OnSuccessListener<QuerySnapshot>, OnFailureListener, OnCompleteListener {
 
-    public static final String TARGET = "TARGET";
+    private static final String TARGET = "TARGET";
+    private static final String TAG = "CreateReviewActivity";
     private UserService mUserService = new UserService();
     private String target;
     private String owner;
@@ -66,9 +68,6 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
                 ReviewService rs = new ReviewService();
                 rs.createReview(review, this);
 
-                //laucnh the map
-                Intent intent = MapsActivity.newIntent(getApplicationContext(), owner);
-                startActivity(intent);
                 break;
         }
     }
@@ -94,9 +93,12 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onComplete(@NonNull Task task) {
         if(task.isSuccessful()) {
-            //launch the map
-            Intent intent = MapsActivity.newIntent(getApplicationContext(), owner);
-            startActivity(intent);
+            // Return to profile view
+            setResult(RESULT_OK);
+            finish();
+        } else {
+            Log.e(TAG, "Failed to submit review: ", task.getException());
+            Toast.makeText(getApplicationContext(), "Failed to submit review: " + task.getException(), Toast.LENGTH_SHORT).show();
         }
     }
 }
