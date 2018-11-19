@@ -36,7 +36,7 @@ public class ProfileView extends AppCompatActivity implements View.OnClickListen
     private static final int REQUEST_ADD_REVIEW = 1;
 
     private UserService mUserService;
-    private ReviewService mReviewService = new ReviewService();
+    private ReviewService mReviewService;
     private String mUserId;
     private User mUser;
     private TextView mUsernameText;
@@ -55,6 +55,7 @@ public class ProfileView extends AppCompatActivity implements View.OnClickListen
         setContentView(R.layout.activity_profile_view);
 
         mUserService = UserService.getInstance();
+        mReviewService = ReviewService.getInstance();
 
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         getUserInfo();

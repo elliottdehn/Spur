@@ -66,7 +66,7 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
                 Date now = new Date();
                 Timestamp ts = new Timestamp(now);
                 Review review = new Review(owner, target, liked, comment, ts);
-                ReviewService rs = new ReviewService();
+                ReviewService rs = ReviewService.getInstance();
                 rs.createReview(review, this);
 
                 break;

@@ -11,9 +11,18 @@ import java.util.Map;
 
 public class ReviewService {
     private FirebaseFirestore db;
+    private static ReviewService instance;
 
-    public ReviewService(){
+    private ReviewService(){
         this.db = FirebaseFirestore.getInstance();
+    }
+
+    public static ReviewService getInstance(){
+        if(instance == null){
+            instance = new ReviewService();
+        }
+
+        return instance;
     }
 
     public void createReview(Review review, OnCompleteListener listener){
