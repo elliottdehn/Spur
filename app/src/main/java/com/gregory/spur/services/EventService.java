@@ -90,19 +90,8 @@ public class EventService {
     }
 
     public void createEvent(Event event, OnSuccessListener<DocumentReference> successListener, OnFailureListener failureListener){
-        Map<String, Object> docData = new HashMap<>();
-        docData.put("name", event.getName());
-        docData.put("desc", event.getDesc());
-        docData.put("creator", event.getCreator());
-        docData.put("loc", event.getLoc());
-        docData.put("min", event.getMin());
-        docData.put("max", event.getMax());
-        docData.put("romantic", event.isRomantic());
-        docData.put("vis", event.getVis());
-        docData.put("start", event.getStart());
-        docData.put("end", event.getEnd());
         db.collection(EVENTS)
-                .add(docData)
+                .add(event)
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
     }

@@ -201,6 +201,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         Event event = new Event(eventTitle, description, startTimeStamp, endTimeStamp, loc);
         DocumentReference creator = mUserService.createRefToUser(mUserId);
         event.setCreator(creator);
+        event.setCreatorUserame(mUser.getUsername());
         return event;
     }
 

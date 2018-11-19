@@ -14,6 +14,7 @@ public class Event {
     public static final int NO_MAX = Integer.MAX_VALUE;
 
     private DocumentReference creator;
+    private String creatorUserame;
     private String name;
     private String desc;
     private Timestamp start;
@@ -144,5 +145,13 @@ public class Event {
 
     public void setVis(String vis) {
         this.vis = vis;
+    }
+
+    public String getCreatorUserame() {
+        return creatorUserame;
+    }
+
+    public void setCreatorUserame(String creatorUserame) {
+        this.creatorUserame = creatorUserame;
     }
 }

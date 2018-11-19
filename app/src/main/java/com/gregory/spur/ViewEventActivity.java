@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,13 +37,15 @@ public class ViewEventActivity extends AppCompatActivity {
     private static final String EXTRA_EVENT_ID = "event_id";
     private static final String EXTRA_USER_ID = "user_id";
     private static final String TAG = "ViewEventActivity";
+
     private String mEventId;
     private String mCreatorId;
-    private String mUserId;
-    private User mUser;
+    private String mCurrentUserId;
+    private User mCurrentUser;
     private EventService mEventService;
     private UserService mUserService;
     private Event mEvent;
+
     private TextView mEventTitle;
     private TextView mEventDescription;
     private TextView mEventCreator;
@@ -62,7 +63,7 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventService = EventService.getInstance();
 
         // get passed in data
-        mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
+        mCurrentUserId = getIntent().getStringExtra(EXTRA_USER_ID);
         mEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         // query for all necessary data from database
@@ -122,15 +123,15 @@ public class ViewEventActivity extends AppCompatActivity {
                         mEvent.getLoc().getLatitude(),
                         mEvent.getLoc().getLongitude(),
                         mEventId,
-                        mUserId);
+                        mCurrentUserId);
                 startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
                 return true;
 
             case R.id.action_attend:
                 // User chose attend event option, add them as an attendee of the event
-                if (mEventId != null && mUser != null && mUserId != null){
+                if (mEventId != null && mCurrentUser != null && mCurrentUserId != null){
                     try {
-                        mEventService.addAttendee(mEventId, mUser, mUserId, new OnCompleteListener<DocumentReference>() {
+                        mEventService.addAttendee(mEventId, mCurrentUser, mCurrentUserId, new OnCompleteListener<DocumentReference>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentReference> task) {
                                 if (task.isSuccessful()){
@@ -138,7 +139,7 @@ public class ViewEventActivity extends AppCompatActivity {
                                     getEventAttendees();
                                     Toast.makeText(getApplicationContext(), "You are now attending the event!", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Log.e(TAG, "Failed to add user " + mUserId + " to event " + mEventId + ": ", task.getException());
+                                    Log.e(TAG, "Failed to add user " + mCurrentUserId + " to event " + mEventId + ": ", task.getException());
                                     Toast.makeText(getApplicationContext(), "Failed to add you to the event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -203,23 +204,19 @@ public class ViewEventActivity extends AppCompatActivity {
     }
 
     private void getCurrentUser(){
-        if(mUserId != null){
-            mUserService.getLoggedInUser(new OnSuccessListener<QuerySnapshot>() {
+        if(mCurrentUserId != null){
+            mUserService.getUser(mCurrentUserId, new OnCompleteListener<DocumentSnapshot>() {
                 @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if(queryDocumentSnapshots.size() == 0){
-                        Log.e(TAG, "No logged in user found");
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()){
+                        DocumentSnapshot userSnapshot = task.getResult();
+                        mCurrentUser = userSnapshot.toObject(User.class);
                     } else {
-                        DocumentSnapshot userSnapshot = queryDocumentSnapshots.getDocuments().get(0);
-                        mUser = userSnapshot.toObject(User.class);
+                        Log.e(TAG, "Unable to get current user: ", task.getException());
                     }
                 }
-            }, new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "Error getting current user: ", e);
-                }
             });
+
         } else {
             Log.e(TAG, "No current user id provided");
         }
@@ -241,11 +238,9 @@ public class ViewEventActivity extends AppCompatActivity {
                             // the available options for the current user
                             invalidateOptionsMenu();
 
-                            getCreatorInfo();
-                            String title = event.getName();
-                            String desc = event.getDesc();
-                            mEventTitle.setText(title);
-                            mEventDescription.setText(desc);
+                            mEventTitle.setText(event.getName());
+                            mEventDescription.setText(event.getDesc());
+                            mEventCreator.setText(event.getCreatorUserame());
                         } else {
                             Log.e(TAG, "No such document");
                         }
@@ -299,43 +294,19 @@ public class ViewEventActivity extends AppCompatActivity {
             return false;
         }
 
-        if (mUserId == null){
+        if (mCurrentUserId == null){
             Log.d(TAG, "No current user found, cannot check permissions");
             return false;
         }
 
-        if (!Objects.equals(mCreatorId.trim(), mUserId.trim())) {
-            Log.d(TAG, "Current user: " + mUserId + ", Creator: " + mCreatorId);
+        if (!Objects.equals(mCreatorId.trim(), mCurrentUserId.trim())) {
+            Log.d(TAG, "Current user: " + mCurrentUserId + ", Creator: " + mCreatorId);
             Log.d(TAG, "Creator id doesn't match user id");
 
             return false;
         } else {
             Log.d(TAG, "Current user is event creator, they can do anything");
             return true;
-        }
-    }
-
-    private void getCreatorInfo(){
-        if(mCreatorId != null){
-            mUserService.getUser(mCreatorId, new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            User user = document.toObject(User.class);
-                            mEventCreator.setText(user.getUsername());
-                        } else {
-                            Log.e(TAG, "No such document");
-                        }
-                    } else {
-                        Log.e(TAG, "get failed with ", task.getException());
-                    }
-                }
-            });
-        } else {
-            Log.e(TAG, "No creator id provided to getCreatorInfo()");
-            Toast.makeText(getApplicationContext(), "No event creator found", Toast.LENGTH_SHORT).show();
         }
     }
 
