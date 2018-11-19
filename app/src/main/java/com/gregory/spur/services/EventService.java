@@ -23,11 +23,12 @@ public class EventService {
 
     private FirebaseFirestore db;
     private UserService userService;
+    private static EventService instance;
     private static final String TAG = "EventService";
     private static final String EVENTS = "events";
     private static final String ATTENDEES = "attendees";
 
-    public EventService(){
+    private EventService(){
         FirebaseFirestore.setLoggingEnabled(true);
         db = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
@@ -35,6 +36,14 @@ public class EventService {
                 .build();
         db.setFirestoreSettings(settings);
         userService = UserService.getInstance();
+    }
+
+    public static EventService getInstance(){
+        if (instance == null){
+            instance = new EventService();
+        }
+
+        return instance;
     }
 
     public void createEvent(Event event) {

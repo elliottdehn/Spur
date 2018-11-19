@@ -52,7 +52,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private User mUser;
     private double mLatitude;
     private double mLongitude;
-    private EventService mEventService = new EventService();
+    private EventService mEventService;
     private UserService mUserService;
 
     @Override
@@ -63,6 +63,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
 
         mUserService = UserService.getInstance();
+        mEventService = EventService.getInstance();
 
         setContentView(R.layout.activity_create_event);
         mButtonUpdate = findViewById(R.id.ButtonUpdate);

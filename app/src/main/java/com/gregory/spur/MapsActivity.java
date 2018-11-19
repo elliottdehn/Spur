@@ -48,7 +48,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private LocationManager locationManager;
-    private EventService mEventService = new EventService();
+    private EventService mEventService;
     private ArrayList<Marker> mMarkers = new ArrayList<Marker>();
     private String mUserId;
     Button button;
@@ -60,6 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
+        mEventService = EventService.getInstance();
 
         button = (Button) findViewById(R.id.Buttonlogout);
         button.setOnClickListener(new View.OnClickListener() {

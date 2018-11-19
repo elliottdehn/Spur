@@ -42,7 +42,7 @@ public class ViewEventActivity extends AppCompatActivity {
     private String mCreatorId;
     private String mUserId;
     private User mUser;
-    private EventService mEventService = new EventService();
+    private EventService mEventService;
     private UserService mUserService;
     private Event mEvent;
     private TextView mEventTitle;
@@ -59,6 +59,7 @@ public class ViewEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_event);
 
         mUserService = UserService.getInstance();
+        mEventService = EventService.getInstance();
 
         // get passed in data
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);
