@@ -34,7 +34,7 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
 
     private static final String TARGET = "TARGET";
     private static final String TAG = "CreateReviewActivity";
-    private UserService mUserService = new UserService();
+    private UserService mUserService;
     private String target;
     private String owner;
     private Button mButton;
@@ -44,11 +44,12 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_create_review);
 
+        mUserService = UserService.getInstance();
+
         mButton = findViewById(R.id.ButtonSubmitReview);
         mButton.setOnClickListener(this);
         mButton.setEnabled(false);
-        UserService us = new UserService();
-        us.getLoggedInUser(this, this);
+        mUserService.getLoggedInUser(this, this);
 
         target = getIntent().getStringExtra(TARGET);
     }

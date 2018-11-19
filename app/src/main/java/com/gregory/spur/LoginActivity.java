@@ -121,7 +121,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
-        mUserService = new UserService();
+        mUserService = UserService.getInstance();
 
         // Set up the login form.
         mEmailView = findViewById(R.id.email);

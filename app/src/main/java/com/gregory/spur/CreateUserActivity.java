@@ -58,7 +58,7 @@ public class CreateUserActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "Your profile is missing some information, please edit it", Toast.LENGTH_LONG).show();
 
-        mUserService = new UserService();
+        mUserService = UserService.getInstance();
 
         mAuthId = getIntent().getStringExtra(EXTRA_AUTH_ID);
         mUserId = getIntent().getStringExtra(EXTRA_USER_ID);

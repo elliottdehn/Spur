@@ -22,17 +22,26 @@ import java.util.Map;
 
 public class UserService {
 
+    private static UserService instance;
     private static final String TAG = "UserService";
     private static final String USERS = "users";
     private FirebaseFirestore db;
 
-    public UserService(){
+    private UserService(){
         FirebaseFirestore.setLoggingEnabled(true);
         db = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
+    }
+
+    public static UserService getInstance(){
+        if(instance == null){
+            instance = new UserService();
+        }
+
+        return instance;
     }
 
     public boolean isValid(User user){

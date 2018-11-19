@@ -53,7 +53,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private double mLatitude;
     private double mLongitude;
     private EventService mEventService = new EventService();
-    private UserService mUserService = new UserService();
+    private UserService mUserService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +61,9 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         //an id + lat/long (update)
         //or a lat/long (create)
         super.onCreate(savedInstanceState);
+
+        mUserService = UserService.getInstance();
+
         setContentView(R.layout.activity_create_event);
         mButtonUpdate = findViewById(R.id.ButtonUpdate);
         mButtonCreate = findViewById(R.id.ButtonCreate);

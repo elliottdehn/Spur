@@ -34,7 +34,7 @@ public class EventService {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-        userService = new UserService();
+        userService = UserService.getInstance();
     }
 
     public void createEvent(Event event) {
