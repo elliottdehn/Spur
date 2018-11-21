@@ -138,6 +138,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View view) {
                 if(internet_connection()) {
                     attemptLogin(false);
+                } else {
+                    makeInternetToast();
                 }
             }
         });
@@ -148,6 +150,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View v) {
                 if(internet_connection()) {
                     attemptLogin(true);
+                } else {
+                    makeInternetToast();
                 }
             }
         });
@@ -160,6 +164,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if(currentUser != null){
             mAuth.signOut();
         }
+    }
+
+    public void makeInternetToast(){
+        Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
     }
 
     @Override
