@@ -2,6 +2,8 @@ package com.gregory.spur;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -56,20 +58,24 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()){
-            case R.id.ButtonSubmitReview:
-                EditText description = findViewById(R.id.EditTextReviewDescription);
-                String comment = description.getText().toString();
-                Boolean liked = ((Switch) findViewById(R.id.SwitchLike)).isChecked();
-                //create and send review to database
+        if(internet_connection()) {
+            switch (v.getId()) {
+                case R.id.ButtonSubmitReview:
+                    EditText description = findViewById(R.id.EditTextReviewDescription);
+                    String comment = description.getText().toString();
+                    Boolean liked = ((Switch) findViewById(R.id.SwitchLike)).isChecked();
+                    //create and send review to database
 
-                Date now = new Date();
-                Timestamp ts = new Timestamp(now);
-                Review review = new Review(owner, target, liked, comment, ts);
-                ReviewService rs = ReviewService.getInstance();
-                rs.createReview(review, this);
+                    Date now = new Date();
+                    Timestamp ts = new Timestamp(now);
+                    Review review = new Review(owner, target, liked, comment, ts);
+                    ReviewService rs = ReviewService.getInstance();
+                    rs.createReview(review, this);
 
-                break;
+                    break;
+            }
+        } else {
+            Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
         }
     }
 
@@ -101,5 +107,15 @@ public class CreateReviewActivity extends AppCompatActivity implements View.OnCl
             Log.e(TAG, "Failed to submit review: ", task.getException());
             Toast.makeText(getApplicationContext(), "Failed to submit review: " + task.getException(), Toast.LENGTH_SHORT).show();
         }
+    }
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }

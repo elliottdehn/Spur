@@ -10,6 +10,8 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -39,6 +41,8 @@ import com.gregory.spur.services.EventService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMyLocationButtonClickListener {
 
@@ -85,28 +89,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED) {
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            0);
+                    ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    1);
+
+                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
             return;
         }
 
-        // if the network provider is available
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        }
-        else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        }
-
-        // Display the logged in user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        Toast.makeText(getApplicationContext(), "Logged in user: " + currentUser.getEmail(), Toast.LENGTH_LONG).show();
+        getPermissionToReadLocation();
     }
 
     public static Intent newIntent(Context packageContext, String userId){
@@ -130,15 +129,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /** Called when the user clicks a marker. */
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        boolean internet = internet_connection();
+        if(internet){
+            // Retrieve the data from the marker.
+            String eventId = (String) marker.getTag();
 
-        // Retrieve the data from the marker.
-        String eventId = (String) marker.getTag();
-
-        // Check if this is an event marker with an Id
-        if (eventId != null) {
-            // Launch the update event activity for this event
-            Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId, mUserId);
-            startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
+            // Check if this is an event marker with an Id
+            if (eventId != null) {
+                // Launch the update event activity for this event
+                Intent intent = ViewEventActivity.newIntent(MapsActivity.this, eventId, mUserId);
+                startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
+            }
+        } else {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
         }
 
         // Return false to indicate that we have not consumed the event and that we wish
@@ -236,15 +239,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        refreshEvents();
+        if(internet_connection()) {
+            refreshEvents();
+        } else {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
+                == PERMISSION_GRANTED){
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
         }
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
+    }
+
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
     @Override
@@ -261,12 +279,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
-                latLng.latitude,
-                latLng.longitude,
-                null,
-                mUserId);
-        startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
+        boolean internet = internet_connection();
+        if(internet) {
+            Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
+                    latLng.latitude,
+                    latLng.longitude,
+                    null,
+                    mUserId);
+            startActivityForResult(intent, REQUEST_CODE_EVENT_CHANGE);
+        } else {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void refreshEvents(){
@@ -292,5 +315,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+    }
+
+    // Identifier for the permission request
+    private static final int READ_FINE_LOC = 1;
+
+    // Called when the user is performing an action which requires the app to read the
+    // user's contacts
+    public void getPermissionToReadLocation() {
+        // 1) Use the support library version ContextCompat.checkSelfPermission(...) to avoid
+        // checking the build version since Context.checkSelfPermission(...) is only available
+        // in Marshmallow
+        // 2) Always check for permission (even if permission has already been granted)
+        // since the user can revoke permissions at any time through Settings
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Fire off an async request to actually get the permission
+            // This will show the standard permission request dialog UI
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    READ_FINE_LOC);
+        }
+    }
+
+    // Callback with the request from calling requestPermissions(...)
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        // Make sure it's our original READ_CONTACTS request
+        if (requestCode == READ_FINE_LOC) {
+            if (grantResults.length == 1 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // if the network provider is available
+                if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                }
+                else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                }
+
+                // Display the logged in user
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                Toast.makeText(getApplicationContext(), "Logged in user: " + currentUser.getEmail(), Toast.LENGTH_LONG).show();
+
+            } else {
+                Toast.makeText(this, "Read Location Perm Denied", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 }

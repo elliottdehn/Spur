@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -93,72 +95,76 @@ public class ViewEventActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_delete:
-                // User chose the delete event option, delete the event from the database
-                mEventService.deleteEvent(mEventId, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            // Delete successful, return to map activity
-                            Log.d(TAG, "Deleted event " + mEventId);
-                            Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT).show();
-                            Intent deleteData = new Intent();
-                            deleteData.putExtra("event_deleted", true);
-                            deleteData.putExtra("deleted_id", mEventId);
-                            setResult(RESULT_OK, deleteData);
-                            finish();
-                        } else {
-                            // Delete failed, show error to user and log stack trace
-                            Log.e(TAG, "Failed to delete event: ", task.getException());
-                            Toast.makeText(getApplicationContext(),
-                                    "Failed to delete event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                return true;
-            case R.id.action_edit:
-                // User chose edit event option, launch the activity to modify the event
-                Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
-                        mEvent.getLoc().getLatitude(),
-                        mEvent.getLoc().getLongitude(),
-                        mEventId,
-                        mCurrentUserId);
-                startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
-                return true;
-
-            case R.id.action_attend:
-                // User chose attend event option, add them as an attendee of the event
-                if (mEventId != null && mCurrentUser != null && mCurrentUserId != null){
-                    try {
-                        mEventService.addAttendee(mEventId, mCurrentUser, mCurrentUserId, new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                if (task.isSuccessful()){
-                                    // Refresh the list of event attendees
-                                    getEventAttendees();
-                                    Toast.makeText(getApplicationContext(), "You are now attending the event!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Log.e(TAG, "Failed to add user " + mCurrentUserId + " to event " + mEventId + ": ", task.getException());
-                                    Toast.makeText(getApplicationContext(), "Failed to add you to the event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                }
+        if(internet_connection()) {
+            switch (item.getItemId()) {
+                case R.id.action_delete:
+                    // User chose the delete event option, delete the event from the database
+                    mEventService.deleteEvent(mEventId, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                // Delete successful, return to map activity
+                                Log.d(TAG, "Deleted event " + mEventId);
+                                Toast.makeText(getApplicationContext(), "Deleted event " + mEvent.getName(), Toast.LENGTH_SHORT).show();
+                                Intent deleteData = new Intent();
+                                deleteData.putExtra("event_deleted", true);
+                                deleteData.putExtra("deleted_id", mEventId);
+                                setResult(RESULT_OK, deleteData);
+                                finish();
+                            } else {
+                                // Delete failed, show error to user and log stack trace
+                                Log.e(TAG, "Failed to delete event: ", task.getException());
+                                Toast.makeText(getApplicationContext(),
+                                        "Failed to delete event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
-                        });
-                    } catch (IllegalArgumentException e){
-                        Toast.makeText(getApplicationContext(), "You are already attending this event", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    return true;
+                case R.id.action_edit:
+                    // User chose edit event option, launch the activity to modify the event
+                    Intent intent = CreateEventActivity.newIntent(getApplicationContext(),
+                            mEvent.getLoc().getLatitude(),
+                            mEvent.getLoc().getLongitude(),
+                            mEventId,
+                            mCurrentUserId);
+                    startActivityForResult(intent, REQUEST_CODE_MODIFY_EVENT);
+                    return true;
+
+                case R.id.action_attend:
+                    // User chose attend event option, add them as an attendee of the event
+                    if (mEventId != null && mCurrentUser != null && mCurrentUserId != null) {
+                        try {
+                            mEventService.addAttendee(mEventId, mCurrentUser, mCurrentUserId, new OnCompleteListener<DocumentReference>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentReference> task) {
+                                    if (task.isSuccessful()) {
+                                        // Refresh the list of event attendees
+                                        getEventAttendees();
+                                        Toast.makeText(getApplicationContext(), "You are now attending the event!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Log.e(TAG, "Failed to add user " + mCurrentUserId + " to event " + mEventId + ": ", task.getException());
+                                        Toast.makeText(getApplicationContext(), "Failed to add you to the event: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        } catch (IllegalArgumentException e) {
+                            Toast.makeText(getApplicationContext(), "You are already attending this event", Toast.LENGTH_SHORT).show();
+                        }
+
+                    } else {
+                        Log.d(TAG, "Cannot add attendee, don't have all data yet");
                     }
+                    return true;
 
-                } else {
-                    Log.d(TAG, "Cannot add attendee, don't have all data yet");
-                }
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
+                default:
+                    // If we got here, the user's action was not recognized.
+                    // Invoke the superclass to handle it.
+                    return super.onOptionsItemSelected(item);
+            }
+        } else {
+            Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -315,5 +321,16 @@ public class ViewEventActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_EVENT_ID, eventId);
         intent.putExtra(EXTRA_USER_ID, userId);
         return intent;
+    }
+
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }
