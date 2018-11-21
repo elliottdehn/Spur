@@ -50,9 +50,15 @@ public class CreateUserActivity extends AppCompatActivity {
         public void onClick(View v) {
             if(internet_connection()) {
                 saveProfile();
+            } else {
+                makeInternetToast();
             }
         }
     };
+
+    public void makeInternetToast(){
+        Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
+    }
 
 
     @Override

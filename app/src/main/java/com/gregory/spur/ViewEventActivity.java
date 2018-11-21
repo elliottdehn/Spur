@@ -80,17 +80,24 @@ public class ViewEventActivity extends AppCompatActivity {
         mEventCreator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mCreatorId != null){
-                    Intent intent = ProfileView.newIntent(getApplicationContext(), mCreatorId);
-                    startActivity(intent);
+                if(internet_connection()) {
+                    if (mCreatorId != null) {
+                        Intent intent = ProfileView.newIntent(getApplicationContext(), mCreatorId);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Creator info hasn't loaded yet, can't view profile", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Creator info hasn't loaded yet, can't view profile");
+                    }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Creator info hasn't loaded yet, can't view profile", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Creator info hasn't loaded yet, can't view profile");
+                    makeInternetToast();
                 }
-
             }
         });
         mAttendees = findViewById(R.id.event_attendees);
+    }
+
+    private void makeInternetToast(){
+        Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
     }
 
     @Override
