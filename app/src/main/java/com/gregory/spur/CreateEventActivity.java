@@ -2,6 +2,8 @@ package com.gregory.spur;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -207,33 +210,47 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()){
-            case R.id.ButtonCreate:
-                Event newEvent = readEventFromUI();
-                mEventService.createEvent(newEvent, new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "Event " + documentReference.getId() + " created");
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Failed to create event: ", e);
-                    }
-                });
-                Intent creationData = new Intent();
-                creationData.putExtra("event_created", true);
-                setResult(RESULT_OK, creationData);
-                finish();
-                break;
-            case R.id.ButtonUpdate:
-                Event modifiedEvent = readEventFromUI();
-                mEventService.updateEvent(mEventId, modifiedEvent);
-                Intent modificationData = new Intent();
-                modificationData.putExtra("event_modified", true);
-                setResult(RESULT_OK, modificationData);
-                finish();
-                break;
+        if(internet_connection()) {
+            switch (v.getId()) {
+                case R.id.ButtonCreate:
+                    Event newEvent = readEventFromUI();
+                    mEventService.createEvent(newEvent, new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "Event " + documentReference.getId() + " created");
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Failed to create event: ", e);
+                        }
+                    });
+                    Intent creationData = new Intent();
+                    creationData.putExtra("event_created", true);
+                    setResult(RESULT_OK, creationData);
+                    finish();
+                    break;
+                case R.id.ButtonUpdate:
+                    Event modifiedEvent = readEventFromUI();
+                    mEventService.updateEvent(mEventId, modifiedEvent);
+                    Intent modificationData = new Intent();
+                    modificationData.putExtra("event_modified", true);
+                    setResult(RESULT_OK, modificationData);
+                    finish();
+                    break;
+            }
+        } else {
+            Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
         }
+    }
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }
