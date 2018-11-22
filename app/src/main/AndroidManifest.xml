@@ -40,6 +40,7 @@
 
         <activity
             android:name=".LoginActivity"
+            android:configChanges="orientation|screenSize">
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,15 +48,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MapsActivity" />
-        <activity android:name=".CreateEventActivity" />
-        <activity android:name=".ViewEventActivity" />
+        <activity android:name=".MapsActivity"
+            android:configChanges="orientation|screenSize"/>
+
+        <activity android:name=".CreateEventActivity"
+            android:configChanges="orientation|screenSize"/>
+
+
+        <activity android:name=".ViewEventActivity"
+            android:configChanges="orientation|screenSize"/>
         <activity
             android:name=".CreateUserActivity"
+            android:configChanges="orientation|screenSize"
             android:noHistory="true" />
-        <activity android:name=".ProfileView" />
+        <activity android:name=".ProfileView"
+            android:configChanges="orientation|screenSize"/>
         <activity
-            android:name=".CreateReviewActivity"></activity>
+            android:name=".CreateReviewActivity">
+            android:configChanges="orientation|screenSize">
+        </activity>
     </application>
 
 </manifest>

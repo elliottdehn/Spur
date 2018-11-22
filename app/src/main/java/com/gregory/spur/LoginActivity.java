@@ -3,8 +3,11 @@ package com.gregory.spur;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -133,7 +136,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin(false);
+                if(internet_connection()) {
+                    attemptLogin(false);
+                } else {
+                    makeInternetToast();
+                }
             }
         });
 
@@ -141,7 +148,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mRegisterAccountButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                attemptLogin(true);
+                if(internet_connection()) {
+                    attemptLogin(true);
+                } else {
+                    makeInternetToast();
+                }
             }
         });
 
@@ -153,6 +164,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if(currentUser != null){
             mAuth.signOut();
         }
+    }
+
+    public void makeInternetToast(){
+        Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -451,6 +466,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
 }

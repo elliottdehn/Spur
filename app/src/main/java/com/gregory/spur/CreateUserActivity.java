@@ -2,6 +2,8 @@ package com.gregory.spur;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,9 +48,17 @@ public class CreateUserActivity extends AppCompatActivity {
     private View.OnClickListener saveClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            saveProfile();
+            if(internet_connection()) {
+                saveProfile();
+            } else {
+                makeInternetToast();
+            }
         }
     };
+
+    public void makeInternetToast(){
+        Toast.makeText(this,"No internet", Toast.LENGTH_SHORT);
+    }
 
 
     @Override
@@ -159,5 +169,15 @@ public class CreateUserActivity extends AppCompatActivity {
                 mFemale.setChecked(true);
             }
         }
+    }
+    boolean internet_connection(){
+        //Check if connected to internet, output accordingly
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }
